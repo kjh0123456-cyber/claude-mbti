@@ -237,16 +237,19 @@
 </div>
 
 <script>
+  // 주사위 유니코드 문자 (⚀~⚅), 홀·짝 결과 연출에 사용
   const DICE_FACES = ['⚀','⚁','⚂','⚃','⚄','⚅'];
   let wins = 0, losses = 0, streak = 0, coins = 100;
-  let isAnimating = false;
+  let isAnimating = false;  // 애니메이션 중 중복 클릭 방지 플래그
 
+  // 홀/짝 선택 버튼 클릭 시 호출
   function guess(userGuess) {
     if (isAnimating) return;
 
     const betInput = document.getElementById('bet');
     const bet = parseInt(betInput.value) || 0;
 
+    // 베팅 금액 범위 검증 (1 이상, 보유 코인 이하)
     if (bet < 1 || bet > coins) {
       showResult(`베팅 금액을 확인하세요 (1~${coins} 코인)`, 'empty');
       return;
@@ -260,21 +263,25 @@
     dice.classList.add('rolling');
     compNumEl.textContent = '굴리는 중...';
 
+    // 80ms마다 주사위 면을 무작위로 교체해 굴러가는 효과 연출
     let tick = 0;
     const interval = setInterval(() => {
       dice.textContent = DICE_FACES[Math.floor(Math.random() * 6)];
       tick++;
     }, 80);
 
+    // 900ms 후 실제 결과 확정
     setTimeout(() => {
       clearInterval(interval);
       dice.classList.remove('rolling');
 
+      // 1~20 사이 난수로 홀짝 판정
       const compNumber = Math.floor(Math.random() * 20) + 1;
       const isOdd = compNumber % 2 !== 0;
       const compGuess = isOdd ? 'odd' : 'even';
       const won = userGuess === compGuess;
 
+      // 홀수면 홀수 주사위, 짝수면 짝수 주사위 아이콘 표시
       dice.textContent = isOdd ? '⚀⚂⚄'.split('')[Math.floor(Math.random()*3)] : '⚁⚃⚅'.split('')[Math.floor(Math.random()*3)];
       compNumEl.textContent = `컴퓨터 숫자: ${compNumber} (${isOdd ? '홀수' : '짝수'})`;
 
@@ -282,6 +289,7 @@
         wins++;
         streak++;
         coins += bet;
+        // 3연승 이상이면 특별 메시지
         const msg = streak >= 3 ? `🔥 ${streak}연승! +${bet} 코인` : `✅ 정답! +${bet} 코인`;
         showResult(msg, 'win');
       } else {
@@ -297,6 +305,7 @@
       document.getElementById('coins').textContent = coins;
 
       if (coins <= 0) {
+        // 코인 소진 시 버튼 잠금 (게임 오버)
         setTimeout(() => {
           showResult('💸 코인이 모두 떨어졌습니다! 처음부터 시작하세요.', 'lose');
           setBtnsDisabled(true);
@@ -306,22 +315,26 @@
         setBtnsDisabled(false);
       }
 
+      // 베팅 최대값을 현재 코인으로 제한
       betInput.max = coins;
       if (parseInt(betInput.value) > coins) betInput.value = coins;
 
     }, 900);
   }
 
+  // 결과 박스 텍스트와 스타일 업데이트
   function showResult(msg, type) {
     const el = document.getElementById('result');
     el.textContent = msg;
     el.className = `result-box result-${type}`;
   }
 
+  // 홀/짝 버튼 일괄 활성화·비활성화
   function setBtnsDisabled(val) {
     document.querySelectorAll('.btn').forEach(b => b.disabled = val);
   }
 
+  // 점수·코인·UI 전체 초기화
   function resetGame() {
     wins = 0; losses = 0; streak = 0; coins = 100;
     isAnimating = false;

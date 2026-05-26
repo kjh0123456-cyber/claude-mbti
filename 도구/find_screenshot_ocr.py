@@ -1,7 +1,11 @@
+# 스크린샷 폴더를 전수 OCR하여 사업자등록증 관련 키워드를 찾는 스크립트
+# WinRT API 사용으로 Windows 10/11 전용
+
 import asyncio
 import os
 
 async def ocr_image(image_path, engine):
+    # 이미지를 WinRT 스토리지 API로 열어 비트맵 디코딩 후 OCR 수행
     try:
         import winrt.windows.storage as storage
         import winrt.windows.graphics.imaging as imaging
@@ -13,6 +17,7 @@ async def ocr_image(image_path, engine):
         result = await engine.recognize_async(bitmap)
         return result.text
     except Exception as e:
+        # OCR 실패 시 빈 문자열 반환 — 검색 루프가 중단되지 않도록
         return ""
 
 async def main():
@@ -24,6 +29,7 @@ async def main():
     engine = ocr.OcrEngine.try_create_from_language(ko_lang)
 
     if engine is None:
+        # 한국어 언어팩 미설치 시 시스템 기본 언어로 폴백
         print("한국어 OCR 엔진 없음, 기본 엔진 사용")
         engine = ocr.OcrEngine.try_create_from_user_profile_languages()
 
@@ -50,7 +56,7 @@ async def main():
                 if kw in text:
                     found.append((fname, kw, text[:200]))
                     print(f"\n발견! [{kw}] {fname}")
-                    break
+                    break  # 같은 파일에서 여러 키워드 중복 기록 방지
 
     print(f"\n\n=== 검색 완료 ===")
     if found:

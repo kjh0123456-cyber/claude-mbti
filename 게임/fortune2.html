@@ -326,16 +326,19 @@
 
 <script>
 /* ─── 별 캔버스 ─────────────────────────────────────── */
+// IIFE로 감싸서 전역 변수 오염 방지
 (function() {
   const cv = document.getElementById('bg-canvas');
   const ctx = cv.getContext('2d');
   let W, H, stars = [];
 
+  // 창 크기에 맞게 캔버스 해상도 조정
   function resize() {
     W = cv.width  = window.innerWidth;
     H = cv.height = window.innerHeight;
   }
 
+  // 별 160개 초기화: 위치·반지름·불투명도·깜박임 속도를 무작위 설정
   function init() {
     resize();
     stars = Array.from({ length: 160 }, () => ({
@@ -350,6 +353,7 @@
   function draw() {
     ctx.clearRect(0, 0, W, H);
     stars.forEach(s => {
+      // 불투명도를 da만큼 증감하고 경계(0.05, 1)에서 방향 반전 → 깜박임 효과
       s.a = Math.max(.05, Math.min(1, s.a + s.da));
       if (s.a <= .05 || s.a >= 1) s.da *= -1;
       ctx.beginPath();
@@ -449,12 +453,13 @@ CARDS.forEach((card, i) => {
 const drawBtn  = document.getElementById('drawBtn');
 const resetBtn = document.getElementById('resetBtn');
 const result   = document.getElementById('result');
-let drawn = false;
+let drawn = false;  // 중복 뽑기 방지 플래그
 
 drawBtn.addEventListener('click', () => {
   if (drawn) return;
   drawn = true;
 
+  // 8장 중 무작위로 한 장 선택
   const idx = Math.floor(Math.random() * CARDS.length);
   const card = CARDS[idx];
   const wraps = [...document.querySelectorAll('.card-wrap')];
@@ -463,13 +468,14 @@ drawBtn.addEventListener('click', () => {
   wraps.forEach((w, i) => {
     if (i === idx) {
       w.classList.add('chosen');
+      // 100ms 딜레이 후 뒤집기 — CSS transition이 시작될 시간을 확보
       setTimeout(() => w.querySelector('.card-inner').classList.add('flipped'), 100);
     } else {
       setTimeout(() => w.classList.add('dimmed'), 200);
     }
   });
 
-  // 결과 표시
+  // 카드 뒤집기 애니메이션(800ms) 완료 후 결과 패널 표시
   setTimeout(() => {
     document.getElementById('resIcon').textContent = card.icon;
     document.getElementById('resIcon').style.setProperty('--res-glow', card.glow);
@@ -487,6 +493,7 @@ drawBtn.addEventListener('click', () => {
   }, 900);
 });
 
+// 카드·결과·버튼 상태를 초기값으로 복원
 resetBtn.addEventListener('click', () => {
   drawn = false;
   document.querySelectorAll('.card-wrap').forEach(w => {

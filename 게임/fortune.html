@@ -298,6 +298,8 @@
   const LUCKY_DIRS   = ['동쪽','서쪽','남쪽','북쪽','동남쪽','서북쪽'];
 
   // ── 시드 난수 (날짜 + 별자리 기반으로 매일 고정) ──
+  // LCG(선형합동법) 알고리즘 — 같은 seed면 항상 같은 수열을 반환하므로
+  // 날짜가 바뀌기 전까지 같은 별자리의 운세가 동일하게 유지된다
   function seededRand(seed) {
     let s = seed;
     return function() {
@@ -306,13 +308,16 @@
     };
   }
 
+  // seed를 이용해 [min, max] 범위의 정수 점수를 반환
   function dayScore(seed, min=1, max=5) {
     const r = seededRand(seed);
     return Math.floor(r() * (max - min + 1)) + min;
   }
 
+  // 배열에서 난수 함수 r을 이용해 무작위 요소 선택
   function pick(arr, r) { return arr[Math.floor(r() * arr.length)]; }
 
+  // 점수에 따라 막대 그래프 색상 결정 (높을수록 금색 계열)
   function getBarColor(score) {
     if (score >= 5) return 'linear-gradient(90deg,#f5d06a,#ffa500)';
     if (score >= 4) return 'linear-gradient(90deg,#6af5c4,#00c9a7)';
@@ -320,6 +325,7 @@
     return 'linear-gradient(90deg,#c46af5,#8a3af5)';
   }
 
+  // n개의 채워진 별(★)과 나머지 빈 별(☆)로 별점 문자열 생성
   function starRating(n) { return '★'.repeat(n) + '☆'.repeat(5-n); }
 
   // ── 별자리 버튼 렌더 ─────────────────────────────
@@ -346,6 +352,7 @@
       return;
     }
     const z = ZODIACS[selectedIdx];
+    // 날짜를 YYYYMMDD 정수로 변환해 시드 생성 — 하루가 지나면 운세가 갱신됨
     const dateKey = now.getFullYear() * 10000 + (now.getMonth()+1) * 100 + now.getDate();
     const baseSeed = dateKey * 100 + selectedIdx;
     const rand = seededRand(baseSeed);
@@ -396,7 +403,7 @@
 
     const card = document.getElementById('resultCard');
     card.classList.remove('show');
-    void card.offsetWidth;
+    void card.offsetWidth;  // 애니메이션 재생을 위해 reflow 강제 트리거
     card.classList.add('show');
   });
 </script>
