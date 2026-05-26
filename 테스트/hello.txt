@@ -1,0 +1,7 @@
+안녕하세요!
+이 파일은 Claude Code가 생성한 테스트 파일입니다.
+
+오늘 날짜: 2026-05-11
+생성자: Claude (claude-sonnet-4-6)
+
+Hello, World!

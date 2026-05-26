@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>할 일 관리</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    /* 전역 초기화 */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* 색상 및 공통 변수 */
+    :root {
+      --bg:       #07070f;
+      --surface:  #111120;
+      --surface2: rgba(255,255,255,0.04);
+      --border:   rgba(255,255,255,0.08);
+      --text:     #e8e8f0;
+      --muted:    rgba(232,232,240,0.38);
+      --cyan:     #00d4ff;
+      --amber:    #f59e0b;
+      --purple:   #c084fc;
+      --rose:     #fb7185;
+      --t:        0.2s ease;
+      /* 현재 탭 색상 (JS에서 동적으로 변경) */
+      --accent:   #00d4ff;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Noto Sans KR', system-ui, sans-serif;
+      min-height: 100vh;
+      padding: 48px 20px 80px;
+    }
+
+    .wrap {
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    /* ─── 헤더 ─── */
+    .header {
+      margin-bottom: 40px;
+      animation: fadeDown 0.5s ease both;
+    }
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(2rem, 6vw, 3rem);
+      letter-spacing: -0.04em;
+      background: linear-gradient(130deg, #fff 40%, rgba(255,255,255,0.4));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+    }
+    /* 로고 점 강조색 */
+    .logo-dot { -webkit-text-fill-color: var(--accent); color: var(--accent); transition: color var(--t); }
+    .subtitle {
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-top: 6px;
+    }
+
+    /* ─── 카테고리 탭 ─── */
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .tab {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 10px 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-weight: 400;
+      cursor: pointer;
+      transition: all var(--t);
+      white-space: nowrap;
+    }
+    .tab:hover { background: rgba(255,255,255,0.06); color: var(--text); }
+    /* 활성 탭: 탭 고유 색상으로 테두리 강조 */
+    .tab.active {
+      color: var(--text);
+      border-color: var(--tab-color);
+      box-shadow: 0 0 0 1px var(--tab-color), 0 4px 20px rgba(0,0,0,0.3);
+    }
+    /* 미완료 항목 수 뱃지 */
+    .badge {
+      font-size: 0.65rem;
+      background: rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 1px 7px;
+      min-width: 22px;
+      text-align: center;
+      transition: all var(--t);
+    }
+    .tab.active .badge {
+      background: var(--tab-color);
+      color: #07070f;
+      font-weight: 500;
+    }
+
+    /* ─── 할 일 입력 폼 ─── */
+    .input-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .input-box {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: var(--text);
+      font-size: 0.9rem;
+      font-family: 'Noto Sans KR', sans-serif;
+      outline: none;
+      transition: border-color var(--t), box-shadow var(--t);
+    }
+    .input-box::placeholder { color: var(--muted); }
+    .input-box:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent);
+    }
+    /* 추가 버튼 색상은 현재 탭 색상 */
+    .add-btn {
+      width: 46px; height: 46px;
+      background: var(--accent);
+      border: none;
+      border-radius: 10px;
+      color: #07070f;
+      font-size: 1.5rem;
+      font-weight: 300;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: filter var(--t), transform var(--t);
+      line-height: 1;
+    }
+    .add-btn:hover  { filter: brightness(1.15); transform: scale(1.05); }
+    .add-btn:active { transform: scale(0.97); }
+
+    /* ─── 할 일 목록 ─── */
+    .list { display: flex; flex-direction: column; gap: 6px; }
+
+    /* 개별 항목 */
+    .todo-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 15px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      animation: fadeUp 0.22s ease both;
+      transition: opacity var(--t), transform var(--t), border-color var(--t);
+    }
+    .todo-item:hover { border-color: rgba(255,255,255,0.13); }
+    /* 완료 항목은 흐리게 표시 */
+    .todo-item.done { opacity: 0.42; }
+    /* 삭제 애니메이션 */
+    .todo-item.removing {
+      opacity: 0 !important;
+      transform: translateX(16px);
+      pointer-events: none;
+    }
+
+    /* 체크 버튼 (커스텀 체크박스) */
+    .check-btn {
+      width: 22px; height: 22px;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 6px;
+      background: none;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: all var(--t);
+      color: transparent;
+      font-size: 0.8rem;
+    }
+    .check-btn:hover { border-color: var(--accent); }
+    /* 완료 상태: 탭 색상으로 채워짐 */
+    .todo-item.done .check-btn {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #07070f;
+    }
+
+    /* 할 일 텍스트 */
+    .todo-text {
+      flex: 1;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      word-break: break-word;
+      transition: color var(--t);
+    }
+    .todo-item.done .todo-text { text-decoration: line-through; }
+
+    /* 삭제 버튼 (호버 시 표시) */
+    .del-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.85rem;
+      padding: 3px 5px;
+      border-radius: 5px;
+      opacity: 0;
+      transition: all var(--t);
+      flex-shrink: 0;
+      line-height: 1;
+    }
+    .todo-item:hover .del-btn  { opacity: 1; }
+    .del-btn:hover { color: var(--rose); background: rgba(251,113,133,0.12); }
+
+    /* ─── 빈 상태 ─── */
+    .empty {
+      text-align: center;
+      padding: 64px 20px;
+      color: var(--muted);
+      animation: fadeUp 0.3s ease both;
+    }
+    .empty-icon { font-size: 2.2rem; margin-bottom: 14px; opacity: 0.6; }
+    .empty-msg  { font-size: 0.85rem; line-height: 1.7; }
+
+    /* ─── 완료 구분선 ─── */
+    .done-divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 10px 0 4px;
+      color: var(--muted);
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+    }
+    .done-divider::before, .done-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ─── 애니메이션 ─── */
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── 반응형 ─── */
+    @media (max-width: 500px) {
+      body { padding: 32px 14px 60px; }
+      .tab  { font-size: 0.73rem; padding: 9px 6px; gap: 5px; }
+      .badge { display: none; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- 헤더 -->
+  <header class="header">
+    <div class="logo">TODO<span class="logo-dot">.</span></div>
+    <div class="subtitle">할 일 관리</div>
+  </header>
+
+  <!-- 카테고리 탭 (JS에서 렌더링) -->
+  <div class="tabs" id="tabs"></div>
+
+  <!-- 할 일 입력 폼 -->
+  <div class="input-row">
+    <input class="input-box" id="input" type="text"
+           placeholder="새 할 일을 입력하세요..." maxlength="200" autocomplete="off">
+    <button class="add-btn" id="addBtn" title="추가 (Enter)">+</button>
+  </div>
+
+  <!-- 할 일 목록 (JS에서 렌더링) -->
+  <div class="list" id="list"></div>
+
+</div>
+
+<script>
+  /* ─── 카테고리 정의 ─────────────────────────────────────── */
+  const CATS = [
+    { id: 'today',   label: '오늘 할 일', color: '#00d4ff' },
+    { id: 'week',    label: '이번 주',    color: '#f59e0b' },
+    { id: 'someday', label: '언젠가',     color: '#c084fc' },
+  ];
+
+  const STORAGE_KEY = 'todo_app_v1';
+
+  /* ─── 상태 ─────────────────────────────────────────────── */
+  let todos     = [];
+  let activeTab = 'today';
+
+  /* ─── localStorage 입출력 ───────────────────────────────── */
+  function loadState() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      if (saved) {
+        todos     = saved.todos     || [];
+        activeTab = saved.activeTab || 'today';
+      }
+    } catch {}
+  }
+
+  function saveState() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ todos, activeTab }));
+  }
+
+  /* ─── CRUD ──────────────────────────────────────────────── */
+
+  /* 새 할 일 추가 (맨 위에 삽입) */
+  function addTodo(text) {
+    todos.unshift({ id: Date.now(), text, category: activeTab, done: false });
+    saveState();
+    render();
+  }
+
+  /* 완료 상태 토글 */
+  function toggleTodo(id) {
+    const todo = todos.find(t => t.id === id);
+    if (!todo) return;
+    todo.done = !todo.done;
+    saveState();
+    render();
+  }
+
+  /* 삭제 (슬라이드아웃 애니메이션 후 제거) */
+  function deleteTodo(id) {
+    const el = document.querySelector(`[data-id="${id}"]`);
+    if (!el) return;
+
+    el.classList.add('removing');
+
+    const cleanup = () => {
+      todos = todos.filter(t => t.id !== id);
+      saveState();
+      render();
+    };
+
+    /* 트랜지션 종료 시 실제 삭제 */
+    el.addEventListener('transitionend', cleanup, { once: true });
+    /* 트랜지션이 실행되지 않을 경우를 위한 폴백 */
+    setTimeout(() => { if (todos.find(t => t.id === id)) cleanup(); }, 400);
+  }
+
+  /* ─── 렌더링 ────────────────────────────────────────────── */
+
+  function render() {
+    const cat = CATS.find(c => c.id === activeTab);
+
+    /* 현재 탭 색상을 CSS 변수로 적용 */
+    document.documentElement.style.setProperty('--accent', cat.color);
+
+    renderTabs(cat);
+    renderList(cat);
+  }
+
+  /* 탭 렌더링 */
+  function renderTabs(activeCat) {
+    document.getElementById('tabs').innerHTML = CATS.map(c => {
+      const count = todos.filter(t => t.category === c.id && !t.done).length;
+      return `
+        <button class="tab${c.id === activeTab ? ' active' : ''}"
+                style="--tab-color:${c.color}"
+                data-tab="${c.id}">
+          ${c.label}
+          <span class="badge">${count}</span>
+        </button>`;
+    }).join('');
+  }
+
+  /* XSS 방지용 HTML 이스케이프 */
+  function esc(str) {
+    return str
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  /* 할 일 항목 HTML 생성 */
+  function todoHtml(t) {
+    return `
+      <div class="todo-item${t.done ? ' done' : ''}" data-id="${t.id}">
+        <button class="check-btn" data-action="toggle" data-id="${t.id}"
+                title="${t.done ? '완료 취소' : '완료'}">
+          ${t.done ? '✓' : ''}
+        </button>
+        <span class="todo-text">${esc(t.text)}</span>
+        <button class="del-btn" data-action="delete" data-id="${t.id}"
+                title="삭제">✕</button>
+      </div>`;
+  }
+
+  /* 목록 렌더링 (미완료 → 완료 순) */
+  function renderList(cat) {
+    const filtered = todos.filter(t => t.category === activeTab);
+    const active   = filtered.filter(t => !t.done);
+    const done     = filtered.filter(t =>  t.done);
+
+    if (filtered.length === 0) {
+      document.getElementById('list').innerHTML = `
+        <div class="empty">
+          <div class="empty-icon">✦</div>
+          <div class="empty-msg">할 일이 없습니다<br>위에서 새 항목을 추가해보세요</div>
+        </div>`;
+      return;
+    }
+
+    let html = active.map(todoHtml).join('');
+
+    /* 완료 항목이 있을 때 구분선 추가 */
+    if (done.length > 0) {
+      html += `<div class="done-divider">완료 ${done.length}개</div>`;
+      html += done.map(todoHtml).join('');
+    }
+
+    document.getElementById('list').innerHTML = html;
+  }
+
+  /* ─── 이벤트 ─────────────────────────────────────────────── */
+
+  /* 탭 클릭 */
+  document.getElementById('tabs').addEventListener('click', e => {
+    const tab = e.target.closest('[data-tab]');
+    if (tab) { activeTab = tab.dataset.tab; saveState(); render(); }
+  });
+
+  /* 할 일 추가 */
+  function handleAdd() {
+    const input = document.getElementById('input');
+    const text  = input.value.trim();
+    if (!text) return;
+    input.value = '';
+    input.focus();
+    addTodo(text);
+  }
+
+  document.getElementById('addBtn').addEventListener('click', handleAdd);
+  document.getElementById('input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') handleAdd();
+  });
+
+  /* 체크 / 삭제 (이벤트 위임으로 동적 요소 처리) */
+  document.getElementById('list').addEventListener('click', e => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const id = Number(btn.dataset.id);
+    if (btn.dataset.action === 'toggle') toggleTodo(id);
+    if (btn.dataset.action === 'delete') deleteTodo(id);
+  });
+
+  /* ─── 초기화 ─────────────────────────────────────────────── */
+  loadState();
+  render();
+</script>
+</body>
+</html>

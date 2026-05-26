@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>오늘의 운세</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1a0533 0%, #0d1b4b 50%, #0a2a1a 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Noto Serif KR', 'Malgun Gothic', serif;
+      color: #f0e6c8;
+      padding: 20px;
+    }
+
+    .stars {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .star {
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      animation: twinkle var(--dur, 3s) ease-in-out infinite;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.2; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.4); }
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 560px;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 2.4rem;
+      letter-spacing: 0.15em;
+      text-shadow: 0 0 20px rgba(255, 220, 120, 0.7);
+      color: #ffd97a;
+    }
+
+    header p {
+      margin-top: 6px;
+      font-size: 0.95rem;
+      color: #a89fc0;
+    }
+
+    .zodiac-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin: 28px 0;
+    }
+
+    .zodiac-btn {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 12px;
+      padding: 12px 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: #f0e6c8;
+      font-size: 0.85rem;
+    }
+
+    .zodiac-btn:hover {
+      background: rgba(255, 217, 122, 0.15);
+      border-color: #ffd97a;
+      transform: translateY(-2px);
+    }
+
+    .zodiac-btn.active {
+      background: rgba(255, 217, 122, 0.2);
+      border-color: #ffd97a;
+      box-shadow: 0 0 12px rgba(255, 217, 122, 0.4);
+    }
+
+    .zodiac-btn .emoji { font-size: 1.6rem; display: block; margin-bottom: 4px; }
+
+    .draw-btn {
+      background: linear-gradient(135deg, #c99a2e, #f5d06a, #c99a2e);
+      border: none;
+      border-radius: 50px;
+      padding: 15px 48px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #1a0533;
+      cursor: pointer;
+      letter-spacing: 0.1em;
+      box-shadow: 0 4px 20px rgba(255, 200, 50, 0.4);
+      transition: all 0.2s;
+    }
+
+    .draw-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(255, 200, 50, 0.6);
+    }
+
+    .draw-btn:active { transform: translateY(0); }
+
+    .result-card {
+      margin-top: 28px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255, 217, 122, 0.3);
+      border-radius: 20px;
+      padding: 28px 24px;
+      display: none;
+      animation: fadeUp 0.5s ease;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-card.show { display: block; }
+
+    .result-sign {
+      font-size: 2.8rem;
+      margin-bottom: 6px;
+    }
+
+    .result-name {
+      font-size: 1.1rem;
+      color: #ffd97a;
+      margin-bottom: 4px;
+    }
+
+    .overall-stars {
+      font-size: 1.4rem;
+      margin: 10px 0 16px;
+      letter-spacing: 4px;
+    }
+
+    .overall-msg {
+      font-size: 1.05rem;
+      line-height: 1.8;
+      color: #e8dfc8;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 18px;
+      margin-bottom: 18px;
+    }
+
+    .categories {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .cat-item {
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 12px 8px;
+    }
+
+    .cat-label {
+      font-size: 0.75rem;
+      color: #a89fc0;
+      margin-bottom: 6px;
+    }
+
+    .cat-score {
+      font-size: 1rem;
+      margin-bottom: 4px;
+    }
+
+    .bar-wrap {
+      background: rgba(255,255,255,0.1);
+      border-radius: 4px;
+      height: 6px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 1s ease;
+    }
+
+    .lucky {
+      margin-top: 18px;
+      font-size: 0.85rem;
+      color: #a89fc0;
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .lucky span { color: #ffd97a; }
+
+    .hint {
+      margin-top: 22px;
+      font-size: 0.82rem;
+      color: #7a6e8a;
+    }
+  </style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+
+<div class="container">
+  <header>
+    <h1>✨ 오늘의 운세</h1>
+    <p id="today-date"></p>
+  </header>
+
+  <div class="zodiac-grid" id="zodiacGrid"></div>
+
+  <button class="draw-btn" id="drawBtn">운세 뽑기</button>
+
+  <div class="result-card" id="resultCard">
+    <div class="result-sign" id="resultSign"></div>
+    <div class="result-name" id="resultName"></div>
+    <div class="overall-stars" id="overallStars"></div>
+    <div class="overall-msg" id="overallMsg"></div>
+    <div class="categories" id="categories"></div>
+    <div class="lucky" id="lucky"></div>
+  </div>
+
+  <p class="hint">* 오늘의 운세는 재미로 즐겨주세요 🌙</p>
+</div>
+
+<script>
+  // ── 별 배경 ──────────────────────────────────────
+  const starsEl = document.getElementById('stars');
+  for (let i = 0; i < 120; i++) {
+    const s = document.createElement('div');
+    const size = Math.random() * 2.5 + 0.5;
+    s.className = 'star';
+    s.style.cssText = `
+      width:${size}px; height:${size}px;
+      top:${Math.random()*100}%; left:${Math.random()*100}%;
+      --dur:${(Math.random()*4+2).toFixed(1)}s;
+      animation-delay:${(Math.random()*5).toFixed(1)}s;
+    `;
+    starsEl.appendChild(s);
+  }
+
+  // ── 날짜 ─────────────────────────────────────────
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('ko-KR', { year:'numeric', month:'long', day:'numeric', weekday:'long' });
+  document.getElementById('today-date').textContent = dateStr;
+
+  // ── 별자리 데이터 ─────────────────────────────────
+  const ZODIACS = [
+    { emoji:'♈', name:'양자리',   en:'aries',       range:'3/21 – 4/19' },
+    { emoji:'♉', name:'황소자리', en:'taurus',      range:'4/20 – 5/20' },
+    { emoji:'♊', name:'쌍둥이자리',en:'gemini',     range:'5/21 – 6/21' },
+    { emoji:'♋', name:'게자리',   en:'cancer',      range:'6/22 – 7/22' },
+    { emoji:'♌', name:'사자자리', en:'leo',          range:'7/23 – 8/22' },
+    { emoji:'♍', name:'처녀자리', en:'virgo',       range:'8/23 – 9/22' },
+    { emoji:'♎', name:'천칭자리', en:'libra',       range:'9/23 – 10/23'},
+    { emoji:'♏', name:'전갈자리', en:'scorpio',     range:'10/24 – 11/21'},
+    { emoji:'♐', name:'사수자리', en:'sagittarius', range:'11/22 – 12/21'},
+    { emoji:'♑', name:'염소자리', en:'capricorn',   range:'12/22 – 1/19' },
+    { emoji:'♒', name:'물병자리', en:'aquarius',    range:'1/20 – 2/18' },
+    { emoji:'♓', name:'물고기자리',en:'pisces',     range:'2/19 – 3/20' },
+  ];
+
+  // ── 운세 문구 풀 ──────────────────────────────────
+  const MSGS = {
+    overall: [
+      "오늘은 새로운 인연이 당신의 문을 두드릴 수 있는 날입니다. 열린 마음으로 주변을 살펴보세요.",
+      "작은 노력이 큰 결실로 돌아오는 하루입니다. 미루던 일을 지금 시작해 보세요.",
+      "예상치 못한 행운이 찾아올 수 있습니다. 직감을 믿고 과감하게 행동해 보세요.",
+      "오늘은 충전과 휴식이 필요한 날입니다. 자신을 아끼는 시간을 가져보세요.",
+      "주변 사람들과의 소통이 활발해지는 날입니다. 솔직한 대화가 큰 도움이 될 것입니다.",
+      "계획했던 일들이 순조롭게 풀려나가는 하루입니다. 자신감을 갖고 나아가세요.",
+      "창의적인 아이디어가 넘치는 날입니다. 머릿속의 생각을 글이나 그림으로 기록해 두세요.",
+      "인내가 필요한 하루입니다. 조급해하지 말고 차근차근 나아가면 반드시 결실을 맺을 것입니다.",
+      "오늘은 과거의 인연이 다시 연결될 수 있는 날입니다. 반가운 소식을 기대해 보세요.",
+      "결단력이 빛을 발하는 날입니다. 오래 고민하던 문제의 답이 오늘 보일 것입니다.",
+    ],
+    love: ['💕', '💘', '💔', '💝', '🌹', '✨', '🔥', '🌙'],
+    money: ['💰', '📈', '🍀', '💸', '🪙', '✨', '📉', '💎'],
+    health: ['🏃', '💪', '😴', '🌿', '⚡', '🧘', '🌟', '🍎'],
+  };
+
+  const LUCKY_COLORS = ['빨간색','주황색','노란색','초록색','파란색','남색','보라색','흰색','금색','분홍색'];
+  const LUCKY_ITEMS  = ['열쇠','책','꽃','동전','펜','거울','사진','차','구슬','별'];
+  const LUCKY_DIRS   = ['동쪽','서쪽','남쪽','북쪽','동남쪽','서북쪽'];
+
+  // ── 시드 난수 (날짜 + 별자리 기반으로 매일 고정) ──
+  function seededRand(seed) {
+    let s = seed;
+    return function() {
+      s = (s * 1664525 + 1013904223) & 0xffffffff;
+      return (s >>> 0) / 0xffffffff;
+    };
+  }
+
+  function dayScore(seed, min=1, max=5) {
+    const r = seededRand(seed);
+    return Math.floor(r() * (max - min + 1)) + min;
+  }
+
+  function pick(arr, r) { return arr[Math.floor(r() * arr.length)]; }
+
+  function getBarColor(score) {
+    if (score >= 5) return 'linear-gradient(90deg,#f5d06a,#ffa500)';
+    if (score >= 4) return 'linear-gradient(90deg,#6af5c4,#00c9a7)';
+    if (score >= 3) return 'linear-gradient(90deg,#6ab3f5,#3a8ef5)';
+    return 'linear-gradient(90deg,#c46af5,#8a3af5)';
+  }
+
+  function starRating(n) { return '★'.repeat(n) + '☆'.repeat(5-n); }
+
+  // ── 별자리 버튼 렌더 ─────────────────────────────
+  let selectedIdx = null;
+  const grid = document.getElementById('zodiacGrid');
+
+  ZODIACS.forEach((z, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'zodiac-btn';
+    btn.innerHTML = `<span class="emoji">${z.emoji}</span>${z.name}<br><small style="color:#7a6e8a">${z.range}</small>`;
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.zodiac-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedIdx = i;
+      document.getElementById('resultCard').classList.remove('show');
+    });
+    grid.appendChild(btn);
+  });
+
+  // ── 운세 뽑기 ────────────────────────────────────
+  document.getElementById('drawBtn').addEventListener('click', () => {
+    if (selectedIdx === null) {
+      alert('별자리를 먼저 선택해 주세요! ✨');
+      return;
+    }
+    const z = ZODIACS[selectedIdx];
+    const dateKey = now.getFullYear() * 10000 + (now.getMonth()+1) * 100 + now.getDate();
+    const baseSeed = dateKey * 100 + selectedIdx;
+    const rand = seededRand(baseSeed);
+
+    const overallScore = dayScore(baseSeed + 1, 2, 5);
+    const loveScore    = dayScore(baseSeed + 2, 1, 5);
+    const moneyScore   = dayScore(baseSeed + 3, 1, 5);
+    const healthScore  = dayScore(baseSeed + 4, 1, 5);
+
+    const msg   = pick(MSGS.overall, rand);
+    const lEmoji = MSGS.love[loveScore - 1];
+    const mEmoji = MSGS.money[moneyScore - 1];
+    const hEmoji = MSGS.health[healthScore - 1];
+
+    const rand2 = seededRand(baseSeed + 99);
+    const luckyColor = pick(LUCKY_COLORS, rand2);
+    const luckyItem  = pick(LUCKY_ITEMS,  rand2);
+    const luckyDir   = pick(LUCKY_DIRS,   rand2);
+    const luckyNum   = Math.floor(rand2() * 45) + 1;
+
+    document.getElementById('resultSign').textContent = z.emoji;
+    document.getElementById('resultName').textContent = z.name;
+    document.getElementById('overallStars').textContent = starRating(overallScore);
+    document.getElementById('overallMsg').textContent = msg;
+
+    const cats = [
+      { label:'💕 연애운', score: loveScore,   emoji: lEmoji },
+      { label:'💰 금전운', score: moneyScore,  emoji: mEmoji },
+      { label:'💪 건강운', score: healthScore, emoji: hEmoji },
+    ];
+
+    document.getElementById('categories').innerHTML = cats.map(c => `
+      <div class="cat-item">
+        <div class="cat-label">${c.label}</div>
+        <div class="cat-score">${starRating(c.score)}</div>
+        <div class="bar-wrap">
+          <div class="bar-fill" style="width:${c.score/5*100}%; background:${getBarColor(c.score)}"></div>
+        </div>
+      </div>
+    `).join('');
+
+    document.getElementById('lucky').innerHTML = `
+      <div>🎨 행운의 색상: <span>${luckyColor}</span></div>
+      <div>🔮 행운의 아이템: <span>${luckyItem}</span></div>
+      <div>🧭 행운의 방향: <span>${luckyDir}</span></div>
+      <div>🍀 행운의 숫자: <span>${luckyNum}</span></div>
+    `;
+
+    const card = document.getElementById('resultCard');
+    card.classList.remove('show');
+    void card.offsetWidth;
+    card.classList.add('show');
+  });
+</script>
+</body>
+</html>

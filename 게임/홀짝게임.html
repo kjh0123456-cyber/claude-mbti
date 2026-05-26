@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>홀짝 게임</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+
+    .container {
+      text-align: center;
+      padding: 40px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 24px;
+      border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      width: 420px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+
+    h1 { font-size: 2.4rem; margin-bottom: 6px; letter-spacing: 4px; }
+    .subtitle { color: #aaa; font-size: 0.9rem; margin-bottom: 30px; }
+
+    .score-board {
+      display: flex;
+      justify-content: space-around;
+      background: rgba(0,0,0,0.3);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 28px;
+    }
+
+    .score-item { display: flex; flex-direction: column; gap: 4px; }
+    .score-label { font-size: 0.75rem; color: #aaa; text-transform: uppercase; letter-spacing: 1px; }
+    .score-value { font-size: 1.8rem; font-weight: bold; }
+    .score-value.win { color: #4ade80; }
+    .score-value.lose { color: #f87171; }
+    .score-value.draw { color: #fbbf24; }
+
+    .computer-area {
+      margin-bottom: 24px;
+    }
+
+    .dice {
+      font-size: 5rem;
+      display: inline-block;
+      transition: transform 0.3s ease;
+      filter: drop-shadow(0 0 12px rgba(255,255,255,0.3));
+    }
+
+    .dice.rolling {
+      animation: roll 0.5s ease infinite;
+    }
+
+    @keyframes roll {
+      0%   { transform: rotate(0deg) scale(1); }
+      25%  { transform: rotate(15deg) scale(1.1); }
+      75%  { transform: rotate(-15deg) scale(1.1); }
+      100% { transform: rotate(0deg) scale(1); }
+    }
+
+    .computer-number {
+      font-size: 1.1rem;
+      color: #94a3b8;
+      margin-top: 6px;
+      min-height: 28px;
+    }
+
+    .bet-section {
+      margin-bottom: 24px;
+    }
+
+    .bet-label {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin-bottom: 10px;
+    }
+
+    .bet-input {
+      width: 120px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 2px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.1);
+      color: white;
+      font-size: 1.1rem;
+      text-align: center;
+      outline: none;
+    }
+
+    .bet-input:focus {
+      border-color: #818cf8;
+    }
+
+    .coins-display {
+      font-size: 0.85rem;
+      color: #fbbf24;
+      margin-top: 8px;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      padding: 16px 36px;
+      font-size: 1.4rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      letter-spacing: 2px;
+    }
+
+    .btn:active { transform: scale(0.95); }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    .btn-odd {
+      background: linear-gradient(135deg, #6366f1, #818cf8);
+      color: white;
+      box-shadow: 0 4px 20px rgba(99,102,241,0.4);
+    }
+    .btn-odd:hover:not(:disabled) {
+      box-shadow: 0 6px 28px rgba(99,102,241,0.6);
+      transform: translateY(-2px);
+    }
+
+    .btn-even {
+      background: linear-gradient(135deg, #ec4899, #f472b6);
+      color: white;
+      box-shadow: 0 4px 20px rgba(236,72,153,0.4);
+    }
+    .btn-even:hover:not(:disabled) {
+      box-shadow: 0 6px 28px rgba(236,72,153,0.6);
+      transform: translateY(-2px);
+    }
+
+    .result-box {
+      min-height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      padding: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .result-win {
+      background: rgba(74,222,128,0.15);
+      border: 1px solid rgba(74,222,128,0.4);
+      color: #4ade80;
+    }
+
+    .result-lose {
+      background: rgba(248,113,113,0.15);
+      border: 1px solid rgba(248,113,113,0.4);
+      color: #f87171;
+    }
+
+    .result-empty {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #475569;
+    }
+
+    .reset-btn {
+      margin-top: 16px;
+      padding: 8px 20px;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #94a3b8;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+    .reset-btn:hover {
+      border-color: rgba(255,255,255,0.5);
+      color: white;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>🎲 홀짝</h1>
+  <p class="subtitle">컴퓨터의 숫자가 홀수일까, 짝수일까?</p>
+
+  <div class="score-board">
+    <div class="score-item">
+      <span class="score-label">승리</span>
+      <span class="score-value win" id="wins">0</span>
+    </div>
+    <div class="score-item">
+      <span class="score-label">패배</span>
+      <span class="score-value lose" id="losses">0</span>
+    </div>
+    <div class="score-item">
+      <span class="score-label">연승</span>
+      <span class="score-value draw" id="streak">0</span>
+    </div>
+  </div>
+
+  <div class="computer-area">
+    <div class="dice" id="dice">🎲</div>
+    <div class="computer-number" id="computer-number">버튼을 눌러 시작하세요</div>
+  </div>
+
+  <div class="bet-section">
+    <div class="bet-label">베팅 코인</div>
+    <input type="number" class="bet-input" id="bet" value="10" min="1" max="100">
+    <div class="coins-display">보유: <span id="coins">100</span> 코인</div>
+  </div>
+
+  <div class="buttons">
+    <button class="btn btn-odd" onclick="guess('odd')">홀</button>
+    <button class="btn btn-even" onclick="guess('even')">짝</button>
+  </div>
+
+  <div class="result-box result-empty" id="result">홀 또는 짝을 선택하세요</div>
+
+  <button class="reset-btn" onclick="resetGame()">처음부터</button>
+</div>
+
+<script>
+  const DICE_FACES = ['⚀','⚁','⚂','⚃','⚄','⚅'];
+  let wins = 0, losses = 0, streak = 0, coins = 100;
+  let isAnimating = false;
+
+  function guess(userGuess) {
+    if (isAnimating) return;
+
+    const betInput = document.getElementById('bet');
+    const bet = parseInt(betInput.value) || 0;
+
+    if (bet < 1 || bet > coins) {
+      showResult(`베팅 금액을 확인하세요 (1~${coins} 코인)`, 'empty');
+      return;
+    }
+
+    isAnimating = true;
+    setBtnsDisabled(true);
+
+    const dice = document.getElementById('dice');
+    const compNumEl = document.getElementById('computer-number');
+    dice.classList.add('rolling');
+    compNumEl.textContent = '굴리는 중...';
+
+    let tick = 0;
+    const interval = setInterval(() => {
+      dice.textContent = DICE_FACES[Math.floor(Math.random() * 6)];
+      tick++;
+    }, 80);
+
+    setTimeout(() => {
+      clearInterval(interval);
+      dice.classList.remove('rolling');
+
+      const compNumber = Math.floor(Math.random() * 20) + 1;
+      const isOdd = compNumber % 2 !== 0;
+      const compGuess = isOdd ? 'odd' : 'even';
+      const won = userGuess === compGuess;
+
+      dice.textContent = isOdd ? '⚀⚂⚄'.split('')[Math.floor(Math.random()*3)] : '⚁⚃⚅'.split('')[Math.floor(Math.random()*3)];
+      compNumEl.textContent = `컴퓨터 숫자: ${compNumber} (${isOdd ? '홀수' : '짝수'})`;
+
+      if (won) {
+        wins++;
+        streak++;
+        coins += bet;
+        const msg = streak >= 3 ? `🔥 ${streak}연승! +${bet} 코인` : `✅ 정답! +${bet} 코인`;
+        showResult(msg, 'win');
+      } else {
+        losses++;
+        streak = 0;
+        coins -= bet;
+        showResult(`❌ 틀렸습니다! -${bet} 코인`, 'lose');
+      }
+
+      document.getElementById('wins').textContent = wins;
+      document.getElementById('losses').textContent = losses;
+      document.getElementById('streak').textContent = streak;
+      document.getElementById('coins').textContent = coins;
+
+      if (coins <= 0) {
+        setTimeout(() => {
+          showResult('💸 코인이 모두 떨어졌습니다! 처음부터 시작하세요.', 'lose');
+          setBtnsDisabled(true);
+        }, 600);
+      } else {
+        isAnimating = false;
+        setBtnsDisabled(false);
+      }
+
+      betInput.max = coins;
+      if (parseInt(betInput.value) > coins) betInput.value = coins;
+
+    }, 900);
+  }
+
+  function showResult(msg, type) {
+    const el = document.getElementById('result');
+    el.textContent = msg;
+    el.className = `result-box result-${type}`;
+  }
+
+  function setBtnsDisabled(val) {
+    document.querySelectorAll('.btn').forEach(b => b.disabled = val);
+  }
+
+  function resetGame() {
+    wins = 0; losses = 0; streak = 0; coins = 100;
+    isAnimating = false;
+    document.getElementById('wins').textContent = 0;
+    document.getElementById('losses').textContent = 0;
+    document.getElementById('streak').textContent = 0;
+    document.getElementById('coins').textContent = 100;
+    document.getElementById('dice').textContent = '🎲';
+    document.getElementById('computer-number').textContent = '버튼을 눌러 시작하세요';
+    document.getElementById('bet').value = 10;
+    document.getElementById('bet').max = 100;
+    showResult('홀 또는 짝을 선택하세요', 'empty');
+    setBtnsDisabled(false);
+  }
+</script>
+</body>
+</html>

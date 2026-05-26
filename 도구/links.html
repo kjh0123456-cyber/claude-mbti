@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>링크 모음</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+  <style>
+    /* 전역 초기화 */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* 색상 및 공통 전환 속도 변수 */
+    :root {
+      --bg:            #07070f;
+      --surface:       rgba(255,255,255,0.04);
+      --surface-hover: rgba(255,255,255,0.07);
+      --border:        rgba(255,255,255,0.08);
+      --text:          #e8e8f0;
+      --muted:         rgba(232,232,240,0.38);
+      --cyan:          #00d4ff;
+      --amber:         #f59e0b;
+      --purple:        #c084fc;
+      --rose:          #fb7185;
+      --transition:    0.22s ease;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ─── 배경 장식 ─── */
+
+    /* 부드럽게 떠다니는 빛 구체 */
+    .bg-orbs {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(110px);
+      opacity: 0.11;
+      animation: orbFloat 28s ease-in-out infinite;
+    }
+    .orb-1 { width: 650px; height: 650px; background: var(--cyan);   top: -220px; left: -120px; }
+    .orb-2 { width: 550px; height: 550px; background: var(--purple); bottom: -180px; right: -120px; animation-delay: -10s; }
+    .orb-3 { width: 420px; height: 420px; background: var(--rose);   top: 55%; left: 55%; transform: translate(-50%,-50%); animation-delay: -18s; }
+    .orb-4 { width: 380px; height: 380px; background: var(--amber);  top: 30%; left: 70%; animation-delay: -6s; }
+
+    @keyframes orbFloat {
+      0%,100% { transform: translate(0,0) scale(1); }
+      33%      { transform: translate(28px,-38px) scale(1.06); }
+      66%      { transform: translate(-22px,18px) scale(0.94); }
+    }
+
+    /* 필름 그레인 질감 오버레이 */
+    .grain {
+      position: fixed;
+      inset: -50%;
+      width: 200%; height: 200%;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.032;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      animation: grain 0.4s steps(2) infinite;
+    }
+    @keyframes grain {
+      0%   { transform: translate(0,0); }
+      25%  { transform: translate(-2%,-3%); }
+      50%  { transform: translate(3%,2%); }
+      75%  { transform: translate(-1%,4%); }
+      100% { transform: translate(2%,-1%); }
+    }
+
+    /* ─── 레이아웃 ─── */
+
+    .page {
+      position: relative;
+      z-index: 2;
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 0 28px 100px;
+    }
+
+    /* 페이지 상단 헤더 */
+    .site-header {
+      padding: 52px 0 40px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: baseline;
+      gap: 20px;
+      animation: fadeDown 0.6s ease both;
+    }
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 로고 그라데이션 텍스트 */
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      letter-spacing: -0.04em;
+      background: linear-gradient(130deg, #fff 40%, rgba(255,255,255,0.45));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+    }
+    /* 로고 뒤 점(.) 강조색 */
+    .logo-dot { -webkit-text-fill-color: var(--cyan); color: var(--cyan); }
+
+    .subtitle {
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-weight: 300;
+    }
+
+    /* ─── 카테고리 ─── */
+
+    .categories { display: flex; flex-direction: column; gap: 60px; padding-top: 60px; }
+
+    /* 카테고리 제목 행 */
+    .cat-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .cat-icon {
+      width: 38px; height: 38px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 9px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .cat-name {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    /* 카테고리 이름 오른쪽 구분선 */
+    .cat-line  { flex: 1; height: 1px; background: var(--border); }
+    .cat-count { font-size: 0.68rem; color: var(--muted); font-weight: 300; letter-spacing: 0.05em; }
+
+    /* 카테고리별 강조색 */
+    .cat-dev  .cat-name { color: var(--cyan);   }
+    .cat-dev  .cat-icon { border-color: rgba(0,212,255,0.25); }
+    .cat-news .cat-name { color: var(--amber);  }
+    .cat-news .cat-icon { border-color: rgba(245,158,11,0.25); }
+    .cat-ai   .cat-name { color: var(--purple); }
+    .cat-ai   .cat-icon { border-color: rgba(192,132,252,0.25); }
+    .cat-shop .cat-name { color: var(--rose);   }
+    .cat-shop .cat-icon { border-color: rgba(251,113,133,0.25); }
+
+    /* ─── 카드 그리드 ─── */
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
+      gap: 10px;
+    }
+
+    /* 개별 링크 카드 */
+    .card {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 13px 15px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      text-decoration: none;
+      color: var(--text);
+      transition: background var(--transition), border-color var(--transition),
+                  transform var(--transition), box-shadow var(--transition);
+      position: relative;
+      overflow: hidden;
+      animation: fadeUp 0.55s ease both;
+    }
+
+    /* 호버 시 카드 왼쪽에 나타나는 색상 바 */
+    .card::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      border-radius: 10px 0 0 10px;
+      opacity: 0;
+      transition: opacity var(--transition);
+    }
+    .card:hover { background: var(--surface-hover); transform: translateY(-2px); }
+    .card:hover::before { opacity: 1; }
+
+    /* 카테고리별 호버 강조색 */
+    .cat-dev  .card::before { background: var(--cyan); }
+    .cat-dev  .card:hover   { border-color: rgba(0,212,255,0.28);   box-shadow: 0 8px 32px rgba(0,212,255,0.10); }
+    .cat-news .card::before { background: var(--amber); }
+    .cat-news .card:hover   { border-color: rgba(245,158,11,0.28);  box-shadow: 0 8px 32px rgba(245,158,11,0.10); }
+    .cat-ai   .card::before { background: var(--purple); }
+    .cat-ai   .card:hover   { border-color: rgba(192,132,252,0.28); box-shadow: 0 8px 32px rgba(192,132,252,0.10); }
+    .cat-shop .card::before { background: var(--rose); }
+    .cat-shop .card:hover   { border-color: rgba(251,113,133,0.28); box-shadow: 0 8px 32px rgba(251,113,133,0.10); }
+
+    /* 파비콘 이미지 */
+    .card-favicon {
+      width: 20px; height: 20px;
+      border-radius: 4px;
+      flex-shrink: 0;
+      object-fit: contain;
+      background: rgba(255,255,255,0.06);
+    }
+    .card-info  { flex: 1; min-width: 0; }
+    .card-title {
+      font-size: 0.82rem;
+      font-weight: 400;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      letter-spacing: 0.01em;
+    }
+    .card-domain {
+      font-size: 0.67rem;
+      color: var(--muted);
+      font-weight: 300;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 2px;
+    }
+    /* 호버 시 슬라이드인 되는 화살표 */
+    .card-arrow {
+      font-size: 0.78rem;
+      color: var(--muted);
+      opacity: 0;
+      transform: translateX(-5px);
+      transition: opacity 0.2s, transform 0.2s;
+      flex-shrink: 0;
+    }
+    .card:hover .card-arrow { opacity: 1; transform: translateX(0); }
+
+    /* 카드 순차 등장 애니메이션 */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .card:nth-child(1) { animation-delay: 0.05s; }
+    .card:nth-child(2) { animation-delay: 0.10s; }
+    .card:nth-child(3) { animation-delay: 0.15s; }
+    .card:nth-child(4) { animation-delay: 0.20s; }
+    .card:nth-child(5) { animation-delay: 0.25s; }
+    .card:nth-child(6) { animation-delay: 0.30s; }
+
+    /* 하단 푸터 */
+    .site-footer {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 48px 24px 32px;
+      font-size: 0.68rem;
+      color: var(--muted);
+      letter-spacing: 0.12em;
+    }
+
+    /* ─── 반응형 ─── */
+    @media (max-width: 700px) {
+      .site-header { flex-direction: column; gap: 6px; }
+      .cards { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 420px) {
+      .page  { padding: 0 16px 80px; }
+      .cards { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- 배경 구체 -->
+<div class="bg-orbs">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="orb orb-4"></div>
+</div>
+<!-- 필름 그레인 오버레이 -->
+<div class="grain"></div>
+
+<div class="page">
+  <header class="site-header">
+    <div class="logo">LINKS<span class="logo-dot">.</span></div>
+    <div class="subtitle">자주 쓰는 링크 모음</div>
+  </header>
+
+  <!-- 카테고리 목록 (아래 스크립트에서 렌더링) -->
+  <div class="categories" id="categories"></div>
+</div>
+
+<footer class="site-footer">— LINKS · 자주 쓰는 링크 모음 —</footer>
+
+<script>
+  /* ─── 링크 데이터 ───────────────────────────────────────
+   * 링크를 추가·수정할 때는 이 배열만 편집하면 됩니다.
+   * 각 항목: { title: 표시 이름, url: 주소, domain: 도메인 }
+   * ─────────────────────────────────────────────────────── */
+  const CATEGORIES = [
+    {
+      id:    'dev',
+      icon:  '⌨️',
+      name:  '개발도구',
+      links: [
+        { title: 'GitHub',        url: 'https://github.com',             domain: 'github.com' },
+        { title: 'MDN Web Docs',  url: 'https://developer.mozilla.org',  domain: 'developer.mozilla.org' },
+        { title: 'Stack Overflow',url: 'https://stackoverflow.com',      domain: 'stackoverflow.com' },
+        { title: 'npm',           url: 'https://npmjs.com',              domain: 'npmjs.com' },
+        { title: 'Can I Use',     url: 'https://caniuse.com',            domain: 'caniuse.com' },
+        { title: 'DevDocs',       url: 'https://devdocs.io',             domain: 'devdocs.io' },
+      ],
+    },
+    {
+      id:    'news',
+      icon:  '📰',
+      name:  '뉴스',
+      links: [
+        { title: '네이버 뉴스',   url: 'https://news.naver.com',         domain: 'news.naver.com' },
+        { title: '다음 뉴스',     url: 'https://news.daum.net',          domain: 'news.daum.net' },
+        { title: 'Hacker News',   url: 'https://news.ycombinator.com',   domain: 'ycombinator.com' },
+        { title: 'BBC 코리아',    url: 'https://bbc.com/korean',         domain: 'bbc.com/korean' },
+        { title: 'The Verge',     url: 'https://theverge.com',           domain: 'theverge.com' },
+        { title: '한겨레',        url: 'https://hani.co.kr',             domain: 'hani.co.kr' },
+      ],
+    },
+    {
+      id:    'ai',
+      icon:  '🤖',
+      name:  'AI',
+      links: [
+        { title: 'Claude',        url: 'https://claude.ai',              domain: 'claude.ai' },
+        { title: 'ChatGPT',       url: 'https://chat.openai.com',        domain: 'chat.openai.com' },
+        { title: 'Gemini',        url: 'https://gemini.google.com',      domain: 'gemini.google.com' },
+        { title: 'Perplexity',    url: 'https://perplexity.ai',          domain: 'perplexity.ai' },
+        { title: 'Midjourney',    url: 'https://midjourney.com',         domain: 'midjourney.com' },
+        { title: 'Hugging Face',  url: 'https://huggingface.co',         domain: 'huggingface.co' },
+      ],
+    },
+    {
+      id:    'shop',
+      icon:  '🛒',
+      name:  '쇼핑',
+      links: [
+        { title: '쿠팡',          url: 'https://coupang.com',            domain: 'coupang.com' },
+        { title: '네이버 쇼핑',   url: 'https://shopping.naver.com',     domain: 'shopping.naver.com' },
+        { title: 'G마켓',         url: 'https://gmarket.co.kr',          domain: 'gmarket.co.kr' },
+        { title: '11번가',        url: 'https://11st.co.kr',             domain: '11st.co.kr' },
+        { title: 'Amazon KR',     url: 'https://amazon.co.kr',           domain: 'amazon.co.kr' },
+        { title: '무신사',        url: 'https://musinsa.com',            domain: 'musinsa.com' },
+      ],
+    },
+  ];
+
+  /* 구글 파비콘 서비스로 아이콘 URL 생성 */
+  const faviconUrl = (domain) =>
+    `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
+
+  /* 카드 한 개의 HTML 생성 */
+  const renderCard = ({ title, url, domain }) => `
+    <a class="card" href="${url}" target="_blank" rel="noopener">
+      <img class="card-favicon" src="${faviconUrl(domain)}" alt="">
+      <div class="card-info">
+        <div class="card-title">${title}</div>
+        <div class="card-domain">${domain}</div>
+      </div>
+      <span class="card-arrow">→</span>
+    </a>`;
+
+  /* 카테고리 섹션 HTML 생성 (사이트 수는 데이터에서 자동 계산) */
+  const renderCategory = ({ id, icon, name, links }) => `
+    <section class="cat-${id}">
+      <div class="cat-header">
+        <div class="cat-icon">${icon}</div>
+        <span class="cat-name">${name}</span>
+        <div class="cat-line"></div>
+        <span class="cat-count">${links.length} sites</span>
+      </div>
+      <div class="cards">
+        ${links.map(renderCard).join('')}
+      </div>
+    </section>`;
+
+  /* 모든 카테고리를 DOM에 삽입 */
+  document.getElementById('categories').innerHTML =
+    CATEGORIES.map(renderCategory).join('');
+</script>
+
+</body>
+</html>

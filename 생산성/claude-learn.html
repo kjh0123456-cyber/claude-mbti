@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code 학습 체크리스트</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #06060e;
+      --surface: rgba(255,255,255,0.04);
+      --border: rgba(255,255,255,0.08);
+      --text: #e2e2ee;
+      --muted: rgba(226,226,238,0.38);
+      --cyan: #00d4ff;
+      --purple: #c084fc;
+      --green: #22d3a5;
+      --amber: #f5a623;
+      --done-bg: rgba(34,211,165,0.04);
+      --done-border: rgba(34,211,165,0.2);
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Background ── */
+    .bg-orbs { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+    .orb { position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.09; animation: orbFloat 30s ease-in-out infinite; }
+    .orb-1 { width: 700px; height: 700px; background: var(--cyan);   top: -250px; left: -150px; }
+    .orb-2 { width: 600px; height: 600px; background: var(--purple); bottom: -200px; right: -150px; animation-delay: -12s; }
+    .orb-3 { width: 450px; height: 450px; background: var(--green);  top: 45%; left: 45%; animation-delay: -22s; }
+    @keyframes orbFloat {
+      0%,100% { transform: translate(0,0) scale(1); }
+      33% { transform: translate(24px,-34px) scale(1.05); }
+      66% { transform: translate(-18px,20px) scale(0.95); }
+    }
+
+    .grain {
+      position: fixed; inset: -50%; width: 200%; height: 200%;
+      pointer-events: none; z-index: 1; opacity: 0.028;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      animation: grain 0.4s steps(2) infinite;
+    }
+    @keyframes grain {
+      0%   { transform: translate(0,0); }
+      25%  { transform: translate(-2%,-3%); }
+      50%  { transform: translate(3%,2%); }
+      75%  { transform: translate(-1%,4%); }
+      100% { transform: translate(2%,-1%); }
+    }
+
+    /* ── Layout ── */
+    .page {
+      position: relative; z-index: 2;
+      max-width: 860px; margin: 0 auto;
+      padding: 0 24px 100px;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      padding-top: 52px;
+      animation: fadeDown 0.5s ease both;
+    }
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .header-top { display: flex; align-items: baseline; gap: 16px; margin-bottom: 32px; }
+    .logo {
+      font-family: 'Syne', sans-serif; font-weight: 800;
+      font-size: clamp(2rem, 5vw, 3.2rem); letter-spacing: -0.04em; line-height: 1;
+      background: linear-gradient(130deg, #fff 40%, rgba(255,255,255,0.4));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .logo-dot { -webkit-text-fill-color: var(--green); }
+    .subtitle { font-size: 0.7rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 300; }
+
+    /* ── Progress ── */
+    .progress-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px 28px 20px;
+      margin-bottom: 36px;
+    }
+    .progress-top {
+      display: flex; align-items: flex-end; justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .progress-label { font-size: 0.65rem; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; }
+    .progress-right { display: flex; align-items: baseline; gap: 10px; }
+    .progress-fraction { font-size: 0.8rem; color: var(--muted); }
+    .progress-pct {
+      font-family: 'Syne', sans-serif; font-weight: 800;
+      font-size: clamp(2.4rem, 5vw, 3.4rem); line-height: 1;
+      background: linear-gradient(90deg, var(--cyan), var(--purple));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .progress-track {
+      width: 100%; height: 7px;
+      background: rgba(255,255,255,0.07); border-radius: 100px; overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--cyan), var(--purple));
+      border-radius: 100px;
+      transition: width 0.7s cubic-bezier(0.34, 1.4, 0.64, 1);
+    }
+    .progress-dots {
+      display: flex; justify-content: space-between;
+      margin-top: 10px; padding: 0 2px;
+    }
+    .p-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      transition: background 0.4s, box-shadow 0.4s;
+    }
+    .p-dot.done { background: var(--green); box-shadow: 0 0 6px var(--green); }
+
+    /* ── Steps ── */
+    .steps { display: flex; flex-direction: column; gap: 10px; }
+
+    .step {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px; overflow: hidden;
+      transition: border-color 0.35s, background 0.35s, box-shadow 0.35s;
+      animation: fadeUp 0.55s ease both;
+    }
+    .step:nth-child(1) { animation-delay: 0.05s; }
+    .step:nth-child(2) { animation-delay: 0.10s; }
+    .step:nth-child(3) { animation-delay: 0.15s; }
+    .step:nth-child(4) { animation-delay: 0.20s; }
+    .step:nth-child(5) { animation-delay: 0.25s; }
+    .step:nth-child(6) { animation-delay: 0.30s; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .step.done {
+      background: var(--done-bg);
+      border-color: var(--done-border);
+    }
+
+    /* Step head */
+    .step-head {
+      display: flex; align-items: center;
+      gap: 14px; padding: 16px 20px;
+      flex-wrap: wrap;
+    }
+
+    /* Checkbox */
+    .step-check { position: relative; flex-shrink: 0; }
+    .step-check input { position: absolute; opacity: 0; width: 0; height: 0; }
+    .check-box {
+      width: 26px; height: 26px; border-radius: 7px;
+      border: 2px solid rgba(255,255,255,0.15);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    }
+    .check-box:hover { border-color: var(--green); }
+    .check-icon { opacity: 0; font-size: 0.9rem; color: var(--bg); transition: opacity 0.15s; }
+    .step-check input:checked ~ .check-box {
+      background: var(--green); border-color: var(--green);
+      box-shadow: 0 0 12px rgba(34,211,165,0.4);
+    }
+    .step-check input:checked ~ .check-box .check-icon { opacity: 1; }
+
+    /* Step info */
+    .step-info { flex: 1; min-width: 0; }
+    .step-num { font-size: 0.58rem; color: var(--muted); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 3px; }
+    .step-title {
+      font-size: 0.88rem; font-weight: 400; letter-spacing: 0.01em;
+      transition: opacity 0.3s, text-decoration-color 0.3s;
+      word-break: keep-all;
+    }
+    .step.done .step-title {
+      opacity: 0.4;
+      text-decoration: line-through;
+      text-decoration-color: var(--green);
+      text-decoration-thickness: 1.5px;
+    }
+
+    /* Timer */
+    .step-timer {
+      display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+      margin-left: auto;
+    }
+    .timer-display {
+      font-size: 0.8rem; font-weight: 300; color: var(--muted);
+      letter-spacing: 0.05em; min-width: 66px; text-align: right;
+      transition: color 0.3s;
+    }
+    .timer-display.ticking {
+      color: var(--amber);
+      animation: timerBlink 1.8s ease-in-out infinite;
+    }
+    @keyframes timerBlink { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+    .timer-btn {
+      font-family: 'DM Mono', monospace; font-size: 0.68rem;
+      letter-spacing: 0.06em; padding: 5px 11px;
+      border-radius: 7px; border: 1px solid var(--border);
+      background: transparent; color: var(--muted);
+      cursor: pointer; transition: all 0.2s; white-space: nowrap;
+    }
+    .timer-btn:hover { border-color: var(--amber); color: var(--amber); }
+    .timer-btn.ticking { border-color: var(--amber); background: rgba(245,166,35,0.1); color: var(--amber); }
+
+    /* Divider */
+    .step-div { height: 1px; background: var(--border); margin: 0 20px; }
+    .step.done .step-div { background: var(--done-border); }
+
+    /* Memo */
+    .step-body { padding: 12px 20px 16px; }
+    .memo-label { font-size: 0.58rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 7px; }
+    .memo {
+      width: 100%;
+      background: rgba(255,255,255,0.025);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.76rem; font-weight: 300; line-height: 1.7;
+      padding: 9px 12px;
+      resize: vertical; min-height: 58px;
+      outline: none;
+      transition: border-color 0.2s, opacity 0.3s;
+    }
+    .memo::placeholder { color: var(--muted); }
+    .memo:focus { border-color: rgba(255,255,255,0.2); }
+    .step.done .memo { opacity: 0.5; }
+
+    /* Reset */
+    .reset-wrap { text-align: center; padding-top: 36px; }
+    .reset-btn {
+      font-family: 'DM Mono', monospace; font-size: 0.65rem;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted); background: transparent;
+      border: 1px solid var(--border); border-radius: 8px;
+      padding: 8px 22px; cursor: pointer; transition: all 0.2s;
+    }
+    .reset-btn:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+
+    /* Footer */
+    .site-footer {
+      position: relative; z-index: 2; text-align: center;
+      padding: 40px 24px 28px; font-size: 0.63rem; color: var(--muted); letter-spacing: 0.1em;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .header-top { flex-direction: column; gap: 6px; }
+      .step-timer { width: 100%; justify-content: flex-end; padding-left: 40px; }
+      .progress-card { padding: 18px 18px 16px; }
+    }
+    @media (max-width: 380px) {
+      .page { padding: 0 14px 80px; }
+      .step-head { padding: 14px 14px; gap: 12px; }
+      .step-body { padding: 10px 14px 14px; }
+      .step-div { margin: 0 14px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg-orbs">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+<div class="grain"></div>
+
+<div class="page">
+
+  <header class="site-header">
+    <div class="header-top">
+      <div class="logo">LEARN<span class="logo-dot">.</span></div>
+      <div class="subtitle">Claude Code 학습 체크리스트</div>
+    </div>
+
+    <div class="progress-card">
+      <div class="progress-top">
+        <span class="progress-label">전체 진행률</span>
+        <div class="progress-right">
+          <span class="progress-fraction" id="prog-frac">0 / 6 완료</span>
+          <span class="progress-pct" id="prog-pct">0%</span>
+        </div>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="prog-fill" style="width:0%"></div>
+      </div>
+      <div class="progress-dots" id="prog-dots">
+        <div class="p-dot" data-di="0"></div>
+        <div class="p-dot" data-di="1"></div>
+        <div class="p-dot" data-di="2"></div>
+        <div class="p-dot" data-di="3"></div>
+        <div class="p-dot" data-di="4"></div>
+        <div class="p-dot" data-di="5"></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="steps" id="steps-list"></div>
+
+  <div class="reset-wrap">
+    <button class="reset-btn" onclick="resetAll()">전체 초기화</button>
+  </div>
+
+</div>
+
+<footer class="site-footer">— Claude Code 학습 체크리스트 · localStorage 자동 저장 —</footer>
+
+<script>
+  const STEPS = [
+    { num: '01', title: 'Claude Code 설치 및 기본 설정' },
+    { num: '02', title: '첫 HTML 파일 만들기 (링크 모음 페이지)' },
+    { num: '03', title: 'filesystem MCP로 PC 파일 다루기' },
+    { num: '04', title: '할 일 앱 처음부터 완성하기' },
+    { num: '05', title: '코드 검토 받고 개선하기' },
+    { num: '06', title: '포트폴리오 사이트 완성하기' },
+  ];
+
+  const times = new Array(STEPS.length).fill(0);
+  const intervals = new Array(STEPS.length).fill(null);
+
+  /* ── Format seconds to HH:MM:SS ── */
+  function fmt(sec) {
+    const h = Math.floor(sec / 3600);
+    const m = Math.floor((sec % 3600) / 60);
+    const s = sec % 60;
+    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  }
+
+  /* ── Save one step to localStorage ── */
+  function save(i) {
+    const cb = document.getElementById(`cb-${i}`);
+    const ta = document.getElementById(`memo-${i}`);
+    localStorage.setItem(`cl_${i}_checked`, cb.checked);
+    localStorage.setItem(`cl_${i}_memo`, ta.value);
+    localStorage.setItem(`cl_${i}_time`, times[i]);
+  }
+
+  /* ── Update progress bar & dots ── */
+  function updateProgress() {
+    const total = STEPS.length;
+    let done = 0;
+    for (let i = 0; i < total; i++) {
+      if (document.getElementById(`cb-${i}`).checked) done++;
+    }
+    const pct = Math.round((done / total) * 100);
+    document.getElementById('prog-frac').textContent = `${done} / ${total} 완료`;
+    document.getElementById('prog-pct').textContent = `${pct}%`;
+    document.getElementById('prog-fill').style.width = `${pct}%`;
+    document.querySelectorAll('.p-dot').forEach(dot => {
+      const idx = parseInt(dot.dataset.di);
+      dot.classList.toggle('done', document.getElementById(`cb-${idx}`).checked);
+    });
+  }
+
+  /* ── Toggle timer ── */
+  function toggleTimer(i) {
+    const btn = document.getElementById(`tbtn-${i}`);
+    const disp = document.getElementById(`tdisp-${i}`);
+
+    if (intervals[i]) {
+      clearInterval(intervals[i]);
+      intervals[i] = null;
+      btn.textContent = '▶ 시작';
+      btn.classList.remove('ticking');
+      disp.classList.remove('ticking');
+      save(i);
+    } else {
+      btn.textContent = '⏸ 정지';
+      btn.classList.add('ticking');
+      disp.classList.add('ticking');
+      intervals[i] = setInterval(() => {
+        times[i]++;
+        disp.textContent = fmt(times[i]);
+        localStorage.setItem(`cl_${i}_time`, times[i]);
+      }, 1000);
+    }
+  }
+
+  /* ── Apply completed visual state ── */
+  function applyDone(i, checked) {
+    const card = document.getElementById(`step-${i}`);
+    card.classList.toggle('done', checked);
+  }
+
+  /* ── Build DOM ── */
+  function buildSteps() {
+    const container = document.getElementById('steps-list');
+    STEPS.forEach((s, i) => {
+      const el = document.createElement('div');
+      el.className = 'step';
+      el.id = `step-${i}`;
+      el.innerHTML = `
+        <div class="step-head">
+          <div class="step-check">
+            <input type="checkbox" id="cb-${i}">
+            <label class="check-box" for="cb-${i}">
+              <span class="check-icon">✓</span>
+            </label>
+          </div>
+          <div class="step-info">
+            <div class="step-num">STEP ${s.num}</div>
+            <div class="step-title">${s.title}</div>
+          </div>
+          <div class="step-timer">
+            <span class="timer-display" id="tdisp-${i}">00:00:00</span>
+            <button class="timer-btn" id="tbtn-${i}" onclick="toggleTimer(${i})">▶ 시작</button>
+          </div>
+        </div>
+        <div class="step-div"></div>
+        <div class="step-body">
+          <div class="memo-label">메모</div>
+          <textarea class="memo" id="memo-${i}" placeholder="학습하면서 느낀 점, 막혔던 부분, 해결법을 기록하세요..."></textarea>
+        </div>
+      `;
+      container.appendChild(el);
+
+      /* Checkbox event */
+      document.getElementById(`cb-${i}`).addEventListener('change', () => {
+        applyDone(i, document.getElementById(`cb-${i}`).checked);
+        save(i);
+        updateProgress();
+      });
+
+      /* Memo auto-save (debounced) */
+      let debounce;
+      document.getElementById(`memo-${i}`).addEventListener('input', () => {
+        clearTimeout(debounce);
+        debounce = setTimeout(() => save(i), 500);
+      });
+    });
+  }
+
+  /* ── Load from localStorage ── */
+  function loadState() {
+    STEPS.forEach((_, i) => {
+      const checked = localStorage.getItem(`cl_${i}_checked`) === 'true';
+      const memo    = localStorage.getItem(`cl_${i}_memo`) || '';
+      const time    = parseInt(localStorage.getItem(`cl_${i}_time`) || '0');
+
+      document.getElementById(`cb-${i}`).checked = checked;
+      document.getElementById(`memo-${i}`).value = memo;
+      times[i] = time;
+      document.getElementById(`tdisp-${i}`).textContent = fmt(time);
+      if (checked) applyDone(i, true);
+    });
+    updateProgress();
+  }
+
+  /* ── Reset everything ── */
+  function resetAll() {
+    if (!confirm('모든 체크, 타이머, 메모를 초기화할까요?')) return;
+    STEPS.forEach((_, i) => {
+      intervals[i] && clearInterval(intervals[i]);
+      intervals[i] = null;
+      times[i] = 0;
+      document.getElementById(`cb-${i}`).checked = false;
+      document.getElementById(`memo-${i}`).value = '';
+      document.getElementById(`tdisp-${i}`).textContent = '00:00:00';
+      document.getElementById(`tdisp-${i}`).classList.remove('ticking');
+      document.getElementById(`tbtn-${i}`).textContent = '▶ 시작';
+      document.getElementById(`tbtn-${i}`).classList.remove('ticking');
+      applyDone(i, false);
+      localStorage.removeItem(`cl_${i}_checked`);
+      localStorage.removeItem(`cl_${i}_memo`);
+      localStorage.removeItem(`cl_${i}_time`);
+    });
+    updateProgress();
+  }
+
+  /* ── Init ── */
+  buildSteps();
+  loadState();
+</script>
+</body>
+</html>
