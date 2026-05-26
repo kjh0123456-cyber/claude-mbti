@@ -1,12 +1,12 @@
-# BMI(체질량지수) 계산기 — 몸무게(kg)와 키(cm)를 입력받아 비만도를 판정한다
+# BMI calculator — takes weight (kg) and height (cm), returns obesity classification
 
 def calculate_bmi(weight_kg, height_cm):
-    # cm → m 변환 후 BMI = 체중 / 키² 공식 적용
+    # convert cm to m, then apply BMI = weight / height² formula
     height_m = height_cm / 100
     return weight_kg / (height_m ** 2)
 
 def get_bmi_category(bmi):
-    # 대한비만학회 기준: 정상 상한이 23으로 서양 기준(25)보다 낮다
+    # Korean obesity standard: normal upper limit is 23, lower than Western standard (25)
     if bmi < 18.5:
         return "저체중", "🔵"
     elif bmi < 23.0:
@@ -23,7 +23,7 @@ def main():
     print("       BMI 체질량지수 계산기")
     print("=" * 40)
 
-    # 양수 값이 입력될 때까지 반복
+    # loop until a positive value is entered
     while True:
         try:
             weight = float(input("\n몸무게를 입력하세요 (kg): "))
@@ -65,5 +65,5 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\n오류 발생: {e}")
     finally:
-        # 더블클릭 실행 시 창이 바로 닫히지 않도록 대기
+        # keep console window open when launched by double-click
         input("Enter를 누르면 종료됩니다...")

@@ -1,11 +1,11 @@
-# 스크린샷 폴더를 전수 OCR하여 사업자등록증 관련 키워드를 찾는 스크립트
-# WinRT API 사용으로 Windows 10/11 전용
+# Scans all screenshots with OCR to find business registration certificate keywords
+# Requires Windows 10/11 — uses WinRT API
 
 import asyncio
 import os
 
 async def ocr_image(image_path, engine):
-    # 이미지를 WinRT 스토리지 API로 열어 비트맵 디코딩 후 OCR 수행
+    # Open image via WinRT storage API, decode to bitmap, then run OCR
     try:
         import winrt.windows.storage as storage
         import winrt.windows.graphics.imaging as imaging
@@ -17,19 +17,19 @@ async def ocr_image(image_path, engine):
         result = await engine.recognize_async(bitmap)
         return result.text
     except Exception as e:
-        # OCR 실패 시 빈 문자열 반환 — 검색 루프가 중단되지 않도록
+        # Return empty string on OCR failure so the search loop continues
         return ""
 
 async def main():
     import winrt.windows.media.ocr as ocr
     import winrt.windows.globalization as glob
 
-    # 한국어 언어로 OCR 엔진 생성 시도
+    # Try to create OCR engine with Korean language
     ko_lang = glob.Language("ko")
     engine = ocr.OcrEngine.try_create_from_language(ko_lang)
 
     if engine is None:
-        # 한국어 언어팩 미설치 시 시스템 기본 언어로 폴백
+        # Fall back to system default language if Korean pack is not installed
         print("한국어 OCR 엔진 없음, 기본 엔진 사용")
         engine = ocr.OcrEngine.try_create_from_user_profile_languages()
 
@@ -56,7 +56,7 @@ async def main():
                 if kw in text:
                     found.append((fname, kw, text[:200]))
                     print(f"\n발견! [{kw}] {fname}")
-                    break  # 같은 파일에서 여러 키워드 중복 기록 방지
+                    break  # avoid recording multiple keyword matches for the same file
 
     print(f"\n\n=== 검색 완료 ===")
     if found:
@@ -68,7 +68,7 @@ async def main():
         print("찾지 못했습니다.")
         print("\n[참고] OCR이 한국어를 인식 못 할 수 있습니다.")
         print("마지막으로 인식된 텍스트 샘플 (최근 5개):")
-        # 마지막 5개 파일 텍스트 출력
+        # print OCR text from last 5 files
         sample_engine = ocr.OcrEngine.try_create_from_user_profile_languages()
         for fname in files[-5:]:
             fpath = os.path.join(screenshots_dir, fname)
