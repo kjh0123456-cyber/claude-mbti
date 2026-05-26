@@ -32,7 +32,7 @@
       overflow-x: hidden;
     }
 
-    /* ── background ── */
+    /* ── 배경 장식 ── */
     .bg-orbs { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
     .orb { position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.09; animation: orbFloat 30s ease-in-out infinite; }
     .orb-1 { width: 700px; height: 700px; background: var(--cyan);   top: -250px; left: -150px; }
@@ -58,14 +58,14 @@
       100% { transform: translate(2%,-1%); }
     }
 
-    /* ── layout ── */
+    /* ── 레이아웃 ── */
     .page {
       position: relative; z-index: 2;
       max-width: 860px; margin: 0 auto;
       padding: 0 24px 100px;
     }
 
-    /* ── header ── */
+    /* ── 헤더 ── */
     .site-header {
       padding-top: 52px;
       animation: fadeDown 0.5s ease both;
@@ -84,7 +84,7 @@
     .logo-dot { -webkit-text-fill-color: var(--green); }
     .subtitle { font-size: 0.7rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 300; }
 
-    /* ── progress ── */
+    /* ── 진행률 카드 ── */
     .progress-card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -126,7 +126,7 @@
     }
     .p-dot.done { background: var(--green); box-shadow: 0 0 6px var(--green); }
 
-    /* ── steps ── */
+    /* ── 학습 단계 목록 ── */
     .steps { display: flex; flex-direction: column; gap: 10px; }
 
     .step {
@@ -151,14 +151,14 @@
       border-color: var(--done-border);
     }
 
-    /* step head */
+    /* 단계 카드 상단 행 */
     .step-head {
       display: flex; align-items: center;
       gap: 14px; padding: 16px 20px;
       flex-wrap: wrap;
     }
 
-    /* checkbox */
+    /* 커스텀 체크박스 */
     .step-check { position: relative; flex-shrink: 0; }
     .step-check input { position: absolute; opacity: 0; width: 0; height: 0; }
     .check-box {
@@ -176,7 +176,7 @@
     }
     .step-check input:checked ~ .check-box .check-icon { opacity: 1; }
 
-    /* step info */
+    /* 단계 번호·제목 영역 */
     .step-info { flex: 1; min-width: 0; }
     .step-num { font-size: 0.58rem; color: var(--muted); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 3px; }
     .step-title {
@@ -191,7 +191,7 @@
       text-decoration-thickness: 1.5px;
     }
 
-    /* timer */
+    /* 타이머 표시·버튼 영역 */
     .step-timer {
       display: flex; align-items: center; gap: 8px; flex-shrink: 0;
       margin-left: auto;
@@ -217,11 +217,11 @@
     .timer-btn:hover { border-color: var(--amber); color: var(--amber); }
     .timer-btn.ticking { border-color: var(--amber); background: rgba(245,166,35,0.1); color: var(--amber); }
 
-    /* divider */
+    /* 구분선 */
     .step-div { height: 1px; background: var(--border); margin: 0 20px; }
     .step.done .step-div { background: var(--done-border); }
 
-    /* memo */
+    /* 메모 입력 영역 */
     .step-body { padding: 12px 20px 16px; }
     .memo-label { font-size: 0.58rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 7px; }
     .memo {
@@ -241,7 +241,7 @@
     .memo:focus { border-color: rgba(255,255,255,0.2); }
     .step.done .memo { opacity: 0.5; }
 
-    /* reset */
+    /* 초기화 버튼 */
     .reset-wrap { text-align: center; padding-top: 36px; }
     .reset-btn {
       font-family: 'DM Mono', monospace; font-size: 0.65rem;
@@ -252,13 +252,13 @@
     }
     .reset-btn:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
 
-    /* footer */
+    /* 푸터 */
     .site-footer {
       position: relative; z-index: 2; text-align: center;
       padding: 40px 24px 28px; font-size: 0.63rem; color: var(--muted); letter-spacing: 0.1em;
     }
 
-    /* responsive */
+    /* 반응형 */
     @media (max-width: 600px) {
       .header-top { flex-direction: column; gap: 6px; }
       .step-timer { width: 100%; justify-content: flex-end; padding-left: 40px; }
@@ -334,7 +334,7 @@
   const times = new Array(STEPS.length).fill(0);
   const intervals = new Array(STEPS.length).fill(null);
 
-  /* ── format seconds to HH:MM:SS ── */
+  /* ── 초를 HH:MM:SS 형식으로 변환 ── */
   function fmt(sec) {
     const h = Math.floor(sec / 3600);
     const m = Math.floor((sec % 3600) / 60);
@@ -342,7 +342,7 @@
     return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
   }
 
-  /* ── save one step to localStorage ── */
+  /* ── 단계 상태를 localStorage에 저장 ── */
   function save(i) {
     const cb = document.getElementById(`cb-${i}`);
     const ta = document.getElementById(`memo-${i}`);
@@ -351,7 +351,7 @@
     localStorage.setItem(`cl_${i}_time`, times[i]);
   }
 
-  /* ── update progress bar & dots ── */
+  /* ── 진행률 바·점 업데이트 ── */
   function updateProgress() {
     const total = STEPS.length;
     let done = 0;
@@ -368,7 +368,7 @@
     });
   }
 
-  /* ── toggle timer ── */
+  /* ── 타이머 시작/정지 토글 ── */
   function toggleTimer(i) {
     const btn = document.getElementById(`tbtn-${i}`);
     const disp = document.getElementById(`tdisp-${i}`);
@@ -392,13 +392,13 @@
     }
   }
 
-  /* ── apply completed visual state ── */
+  /* ── 완료 시각 상태 적용 ── */
   function applyDone(i, checked) {
     const card = document.getElementById(`step-${i}`);
     card.classList.toggle('done', checked);
   }
 
-  /* ── build DOM ── */
+  /* ── 단계 카드 DOM 생성 ── */
   function buildSteps() {
     const container = document.getElementById('steps-list');
     STEPS.forEach((s, i) => {
@@ -430,14 +430,14 @@
       `;
       container.appendChild(el);
 
-      /* checkbox event */
+      /* 체크박스 변경 이벤트 */
       document.getElementById(`cb-${i}`).addEventListener('change', () => {
         applyDone(i, document.getElementById(`cb-${i}`).checked);
         save(i);
         updateProgress();
       });
 
-      /* memo auto-save (debounced) */
+      /* 메모 자동 저장 (디바운스: 500ms 대기 후 저장) */
       let debounce;
       document.getElementById(`memo-${i}`).addEventListener('input', () => {
         clearTimeout(debounce);
@@ -446,7 +446,7 @@
     });
   }
 
-  /* ── load from localStorage ── */
+  /* ── localStorage에서 저장된 상태 불러오기 ── */
   function loadState() {
     STEPS.forEach((_, i) => {
       const checked = localStorage.getItem(`cl_${i}_checked`) === 'true';
@@ -462,7 +462,7 @@
     updateProgress();
   }
 
-  /* ── reset everything ── */
+  /* ── 전체 초기화 ── */
   function resetAll() {
     if (!confirm('모든 체크, 타이머, 메모를 초기화할까요?')) return;
     STEPS.forEach((_, i) => {
@@ -483,7 +483,7 @@
     updateProgress();
   }
 
-  /* ── init ── */
+  /* ── 초기화 ── */
   buildSteps();
   loadState();
 </script>

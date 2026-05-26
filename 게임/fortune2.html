@@ -30,7 +30,7 @@
       overflow-x: hidden;
     }
 
-    /* ── star background ── */
+    /* ── 별 배경 ── */
     #bg-canvas {
       position: fixed;
       inset: 0;
@@ -38,7 +38,7 @@
       z-index: 0;
     }
 
-    /* ── layout ── */
+    /* ── 레이아웃 ── */
     .page {
       position: relative;
       z-index: 1;
@@ -51,7 +51,7 @@
       gap: 36px;
     }
 
-    /* ── header ── */
+    /* ── 헤더 ── */
     header { text-align: center; }
 
     header h1 {
@@ -68,7 +68,7 @@
       letter-spacing: .1em;
     }
 
-    /* ── card grid ── */
+    /* ── 카드 그리드 ── */
     .card-grid {
       display: grid;
       grid-template-columns: repeat(4, var(--card-w));
@@ -77,7 +77,7 @@
       justify-content: center;
     }
 
-    /* ── card ── */
+    /* ── 카드 ── */
     .card-wrap {
       width: var(--card-w);
       height: var(--card-h);
@@ -96,7 +96,7 @@
 
     .card-inner.flipped { transform: rotateY(180deg); }
 
-    /* front & back common styles */
+    /* 앞·뒷면 공통 */
     .card-face {
       position: absolute;
       inset: 0;
@@ -109,7 +109,7 @@
       overflow: hidden;
     }
 
-    /* ── back face (before selection) ── */
+    /* ── 뒷면 (선택 전) ── */
     .card-back {
       background: linear-gradient(145deg, #1e1040 0%, #2d1a60 50%, #1a0c40 100%);
       border: 1px solid rgba(212,169,74,.25);
@@ -135,7 +135,7 @@
       50%      { opacity: .7;  transform: scale(1.08); }
     }
 
-    /* ── front face ── */
+    /* ── 앞면 ── */
     .card-front {
       transform: rotateY(180deg);
       background: linear-gradient(145deg, var(--card-bg-a, #1a0c40), var(--card-bg-b, #2d1a60));
@@ -157,18 +157,18 @@
       padding: 3px 10px;
     }
 
-    /* chosen card highlight */
+    /* 선택된 카드 하이라이트 */
     .card-wrap.chosen .card-inner {
       box-shadow: 0 0 0 2px var(--gold), 0 0 40px var(--gold);
     }
 
-    /* unchosen cards dimmed */
+    /* 선택 안 된 카드 흐림 */
     .card-wrap.dimmed .card-back {
       opacity: .35;
       transition: opacity .6s;
     }
 
-    /* ── button ── */
+    /* ── 버튼 ── */
     .draw-btn {
       position: relative;
       background: none;
@@ -212,7 +212,7 @@
 
     @keyframes spin { to { --a: 360deg; } }
 
-    /* ── result panel ── */
+    /* ── 결과 패널 ── */
     #result {
       width: 100%;
       max-width: 480px;
@@ -267,7 +267,7 @@
       letter-spacing: .08em;
     }
 
-    /* ── reset button ── */
+    /* ── 리셋 버튼 ── */
     #resetBtn {
       display: none;
       background: none;
@@ -284,7 +284,7 @@
     #resetBtn:hover { color: #a090c0; }
     #resetBtn.show { display: block; }
 
-    /* ── responsive ── */
+    /* ── 반응형 ── */
     @media (max-width: 600px) {
       :root { --card-w: 80px; --card-h: 124px; }
       .card-grid { gap: 10px; }
@@ -325,20 +325,20 @@
 </div>
 
 <script>
-/* ─── star canvas ─────────────────────────────────────── */
-// wrapped in IIFE to avoid polluting global scope
+/* ─── 별 캔버스 ─────────────────────────────────────── */
+// IIFE로 감싸서 전역 변수 오염 방지
 (function() {
   const cv = document.getElementById('bg-canvas');
   const ctx = cv.getContext('2d');
   let W, H, stars = [];
 
-  // adjust canvas resolution to match window size
+  // 창 크기에 맞게 캔버스 해상도 조정
   function resize() {
     W = cv.width  = window.innerWidth;
     H = cv.height = window.innerHeight;
   }
 
-  // initialize 160 stars with random position, radius, opacity, and twinkle speed
+  // 별 160개 초기화: 위치·반지름·불투명도·깜박임 속도를 무작위 설정
   function init() {
     resize();
     stars = Array.from({ length: 160 }, () => ({
@@ -353,7 +353,7 @@
   function draw() {
     ctx.clearRect(0, 0, W, H);
     stars.forEach(s => {
-      // adjust opacity by da and reverse at bounds (0.05, 1) for twinkle effect
+      // 불투명도를 da만큼 증감하고 경계(0.05, 1)에서 방향 반전 → 깜박임 효과
       s.a = Math.max(.05, Math.min(1, s.a + s.da));
       if (s.a <= .05 || s.a >= 1) s.da *= -1;
       ctx.beginPath();
@@ -369,11 +369,11 @@
   draw();
 })();
 
-/* ─── date ────────────────────────────────────────────── */
+/* ─── 날짜 ────────────────────────────────────────────── */
 document.getElementById('date-line').textContent =
   new Date().toLocaleDateString('ko-KR', { year:'numeric', month:'long', day:'numeric', weekday:'long' });
 
-/* ─── card data ─────────────────────────────────────── */
+/* ─── 카드 데이터 ─────────────────────────────────────── */
 const CARDS = [
   {
     icon: '🌙', name: '달의 속삭임', keyword: '직감 · 내면',
@@ -425,7 +425,7 @@ const CARDS = [
   },
 ];
 
-/* ─── card render ───────────────────────────────────────── */
+/* ─── 카드 렌더 ───────────────────────────────────────── */
 const grid = document.getElementById('cardGrid');
 
 CARDS.forEach((card, i) => {
@@ -449,17 +449,17 @@ CARDS.forEach((card, i) => {
   grid.appendChild(wrap);
 });
 
-/* ─── draw logic ───────────────────────────────────────── */
+/* ─── 뽑기 로직 ───────────────────────────────────────── */
 const drawBtn  = document.getElementById('drawBtn');
 const resetBtn = document.getElementById('resetBtn');
 const result   = document.getElementById('result');
-let drawn = false;  // flag to prevent double draw
+let drawn = false;  // 중복 뽑기 방지 플래그
 
 drawBtn.addEventListener('click', () => {
   if (drawn) return;
   drawn = true;
 
-  // pick one card at random from the 8
+  // 8장 중 무작위로 한 장 선택
   const idx = Math.floor(Math.random() * CARDS.length);
   const card = CARDS[idx];
   const wraps = [...document.querySelectorAll('.card-wrap')];
@@ -468,14 +468,14 @@ drawBtn.addEventListener('click', () => {
   wraps.forEach((w, i) => {
     if (i === idx) {
       w.classList.add('chosen');
-      // slight delay before flip to give CSS transition time to start
+      // 100ms 딜레이 후 뒤집기 — CSS transition이 시작될 시간을 확보
       setTimeout(() => w.querySelector('.card-inner').classList.add('flipped'), 100);
     } else {
       setTimeout(() => w.classList.add('dimmed'), 200);
     }
   });
 
-  // show result panel after card flip animation (800ms) completes
+  // 카드 뒤집기 애니메이션(800ms) 완료 후 결과 패널 표시
   setTimeout(() => {
     document.getElementById('resIcon').textContent = card.icon;
     document.getElementById('resIcon').style.setProperty('--res-glow', card.glow);
@@ -493,7 +493,7 @@ drawBtn.addEventListener('click', () => {
   }, 900);
 });
 
-// restore cards, result, and button to initial state
+// 카드·결과·버튼 상태를 초기값으로 복원
 resetBtn.addEventListener('click', () => {
   drawn = false;
   document.querySelectorAll('.card-wrap').forEach(w => {

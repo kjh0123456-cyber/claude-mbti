@@ -238,7 +238,7 @@
 </div>
 
 <script>
-  // ── star background ──────────────────────────────────────
+  // ── 별 배경 ──────────────────────────────────────
   const starsEl = document.getElementById('stars');
   for (let i = 0; i < 120; i++) {
     const s = document.createElement('div');
@@ -253,12 +253,12 @@
     starsEl.appendChild(s);
   }
 
-  // ── date ─────────────────────────────────────────
+  // ── 날짜 ─────────────────────────────────────────
   const now = new Date();
   const dateStr = now.toLocaleDateString('ko-KR', { year:'numeric', month:'long', day:'numeric', weekday:'long' });
   document.getElementById('today-date').textContent = dateStr;
 
-  // ── zodiac data ─────────────────────────────────
+  // ── 별자리 데이터 ─────────────────────────────────
   const ZODIACS = [
     { emoji:'♈', name:'양자리',   en:'aries',       range:'3/21 – 4/19' },
     { emoji:'♉', name:'황소자리', en:'taurus',      range:'4/20 – 5/20' },
@@ -274,7 +274,7 @@
     { emoji:'♓', name:'물고기자리',en:'pisces',     range:'2/19 – 3/20' },
   ];
 
-  // ── fortune message pool ──────────────────────────────────
+  // ── 운세 문구 풀 ──────────────────────────────────
   const MSGS = {
     overall: [
       "오늘은 새로운 인연이 당신의 문을 두드릴 수 있는 날입니다. 열린 마음으로 주변을 살펴보세요.",
@@ -297,9 +297,9 @@
   const LUCKY_ITEMS  = ['열쇠','책','꽃','동전','펜','거울','사진','차','구슬','별'];
   const LUCKY_DIRS   = ['동쪽','서쪽','남쪽','북쪽','동남쪽','서북쪽'];
 
-  // ── seeded random (fixed per day based on date + zodiac sign) ──
-  // LCG (linear congruential generator) — same seed always produces the same sequence,
-  // so each zodiac's fortune stays the same until the date changes
+  // ── 시드 난수 (날짜 + 별자리 기반으로 매일 고정) ──
+  // LCG(선형합동법) 알고리즘 — 같은 seed면 항상 같은 수열을 반환하므로
+  // 날짜가 바뀌기 전까지 같은 별자리의 운세가 동일하게 유지된다
   function seededRand(seed) {
     let s = seed;
     return function() {
@@ -308,16 +308,16 @@
     };
   }
 
-  // returns an integer score in [min, max] using the seed
+  // seed를 이용해 [min, max] 범위의 정수 점수를 반환
   function dayScore(seed, min=1, max=5) {
     const r = seededRand(seed);
     return Math.floor(r() * (max - min + 1)) + min;
   }
 
-  // pick a random element from array using rand function r
+  // 배열에서 난수 함수 r을 이용해 무작위 요소 선택
   function pick(arr, r) { return arr[Math.floor(r() * arr.length)]; }
 
-  // determine bar color based on score (higher = gold)
+  // 점수에 따라 막대 그래프 색상 결정 (높을수록 금색 계열)
   function getBarColor(score) {
     if (score >= 5) return 'linear-gradient(90deg,#f5d06a,#ffa500)';
     if (score >= 4) return 'linear-gradient(90deg,#6af5c4,#00c9a7)';
@@ -325,10 +325,10 @@
     return 'linear-gradient(90deg,#c46af5,#8a3af5)';
   }
 
-  // build star rating string with n filled (★) and (5-n) empty (☆) stars
+  // n개의 채워진 별(★)과 나머지 빈 별(☆)로 별점 문자열 생성
   function starRating(n) { return '★'.repeat(n) + '☆'.repeat(5-n); }
 
-  // ── zodiac button render ─────────────────────────────
+  // ── 별자리 버튼 렌더 ─────────────────────────────
   let selectedIdx = null;
   const grid = document.getElementById('zodiacGrid');
 
@@ -345,14 +345,14 @@
     grid.appendChild(btn);
   });
 
-  // ── fortune draw ────────────────────────────────────
+  // ── 운세 뽑기 ────────────────────────────────────
   document.getElementById('drawBtn').addEventListener('click', () => {
     if (selectedIdx === null) {
       alert('별자리를 먼저 선택해 주세요! ✨');
       return;
     }
     const z = ZODIACS[selectedIdx];
-    // encode date as YYYYMMDD integer for the seed — fortune refreshes each day
+    // 날짜를 YYYYMMDD 정수로 변환해 시드 생성 — 하루가 지나면 운세가 갱신됨
     const dateKey = now.getFullYear() * 10000 + (now.getMonth()+1) * 100 + now.getDate();
     const baseSeed = dateKey * 100 + selectedIdx;
     const rand = seededRand(baseSeed);
@@ -403,7 +403,7 @@
 
     const card = document.getElementById('resultCard');
     card.classList.remove('show');
-    void card.offsetWidth;  // force reflow to restart CSS animation
+    void card.offsetWidth;  // 애니메이션 재생을 위해 reflow 강제 트리거
     card.classList.add('show');
   });
 </script>
