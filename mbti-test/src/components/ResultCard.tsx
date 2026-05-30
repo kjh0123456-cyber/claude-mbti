@@ -5,6 +5,7 @@ interface Props {
   profile: MbtiProfile;
 }
 
+// html2canvas 캡처 대상인 결과 카드를 렌더링한다. forwardRef로 부모의 ref를 DOM 루트에 연결한다
 const ResultCard = forwardRef<HTMLDivElement, Props>(({ profile }, ref) => {
   return (
     <div

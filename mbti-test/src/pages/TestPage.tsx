@@ -2,28 +2,32 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { questions } from '../data/questions';
 import { calculateMbti } from '../utils/calculateMbti';
-import { recordResult } from '../utils/statsStorage';
+import { useStats } from '../hooks/useStats';
 import ProgressBar from '../components/ProgressBar';
 import QuestionCard from '../components/QuestionCard';
 
+// 12개 질문을 순서대로 보여주고 답변을 수집하며, 완료 시 결과를 계산해 저장 후 결과 페이지로 이동한다
 export default function TestPage() {
   const navigate = useNavigate();
+  const { recordResult } = useStats();
   const [answers, setAnswers] = useState<number[]>([]);
 
   const current = answers.length;
   const question = questions[current];
 
-  function handleAnswer(value: 0 | 1) {
+  // 선택한 답변을 기록하고, 12문항이 완료되면 MBTI를 계산해 통계에 저장한 뒤 결과 페이지로 이동한다
+  async function handleAnswer(value: 0 | 1) {
     const next = [...answers, value];
     if (next.length < questions.length) {
       setAnswers(next);
       return;
     }
     const { type } = calculateMbti(next);
-    recordResult(type);
+    await recordResult(type);
     navigate(`/result/${type}`, { state: { answers: next } });
   }
 
+  // 이전 질문으로 돌아가거나, 첫 번째 질문이면 홈으로 이동한다
   function handleBack() {
     if (answers.length === 0) {
       navigate('/');

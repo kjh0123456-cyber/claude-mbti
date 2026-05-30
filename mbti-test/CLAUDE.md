@@ -71,6 +71,7 @@ npx tsc --noEmit   # 타입 체크만
 - 모든 props에 **인터페이스** 정의 (`interface Props { ... }`)
 - 컴포넌트는 **named export** (`export default function X`)
 - 유틸 함수는 **순수 함수**로 작성 — 부수효과 없음, 테스트 용이
+- 모든 함수 위에 해당 함수의 기능을 설명하는 한 줄 주석을 작성한다
 
 ### 타입 정의 위치
 ```ts

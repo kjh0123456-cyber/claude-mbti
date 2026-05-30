@@ -1,7 +1,10 @@
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
+// 테스트 진입 화면을 렌더링하고, Google 로그인/로그아웃 버튼과 테스트 시작 버튼을 제공한다
 export default function LandingPage() {
   const navigate = useNavigate();
+  const { user, loading, signIn, signOut } = useAuth();
 
   return (
     <div className="min-h-screen bg-paper flex flex-col">
@@ -9,9 +12,30 @@ export default function LandingPage() {
         <span className="text-[10px] tracking-[0.22em] text-muted uppercase font-semibold">
           성격 유형 연구소
         </span>
-        <span className="text-[10px] tracking-[0.22em] text-muted uppercase font-semibold">
-          No.&thinsp;16
-        </span>
+        {!loading && (
+          user ? (
+            <div className="flex items-center gap-4">
+              <span className="text-[10px] tracking-[0.15em] text-muted font-semibold hidden sm:inline">
+                {user.displayName}
+              </span>
+              <button
+                type="button"
+                onClick={signOut}
+                className="text-[10px] tracking-[0.2em] text-muted uppercase font-semibold hover:text-ink transition-colors duration-150"
+              >
+                로그아웃
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={signIn}
+              className="text-[10px] tracking-[0.2em] text-muted uppercase font-semibold hover:text-ink transition-colors duration-150"
+            >
+              Google 로그인
+            </button>
+          )
+        )}
       </header>
 
       <main className="flex-1 flex flex-col justify-center px-8 sm:px-16 max-w-4xl w-full mx-auto py-16">

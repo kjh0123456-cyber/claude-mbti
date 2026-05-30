@@ -5,6 +5,7 @@ interface Props {
   onAnswer: (value: 0 | 1) => void;
 }
 
+// 질문 텍스트와 두 개의 선택지를 표시하고, 선택 시 onAnswer 콜백을 호출한다
 export default function QuestionCard({ question, onAnswer }: Props) {
   return (
     <div className="w-full animate-fade-up">

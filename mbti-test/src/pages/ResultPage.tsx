@@ -5,6 +5,7 @@ import { mbtiProfiles } from '../data/mbtiProfiles';
 import type { MbtiType } from '../data/mbtiProfiles';
 import ResultCard from '../components/ResultCard';
 
+// URL 파라미터로 받은 MBTI 유형의 프로필을 표시하고, 이미지 저장 및 공유 기능을 제공한다
 export default function ResultPage() {
   const { type } = useParams<{ type: string }>();
   const navigate = useNavigate();
@@ -27,6 +28,7 @@ export default function ResultPage() {
 
   const profile = mbtiProfiles[type as MbtiType];
 
+  // 결과 카드를 html2canvas로 캡처해 PNG 파일로 다운로드한다
   async function handleDownload() {
     if (!cardRef.current) return;
     const canvas = await html2canvas(cardRef.current, { scale: 2 });
@@ -36,6 +38,7 @@ export default function ResultPage() {
     link.click();
   }
 
+  // 결과 텍스트를 Web Share API로 공유하거나, 지원하지 않으면 클립보드에 복사한다
   async function handleShare() {
     const text = `나의 성격 유형은 ${type} - ${profile.nickname}입니다! 16가지 성격 유형 테스트를 해보세요.`;
     if (navigator.share) {

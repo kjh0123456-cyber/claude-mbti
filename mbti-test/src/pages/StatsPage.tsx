@@ -1,11 +1,29 @@
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bar } from 'react-chartjs-2';
-import { getStats, clearStats } from '../utils/statsStorage';
+import { useStats } from '../hooks/useStats';
+import { useAuth } from '../context/AuthContext';
 import type { MbtiType } from '../data/mbtiProfiles';
+import type { StatsMap } from '../utils/statsStorage';
 
+// 사용자의 테스트 결과 통계를 막대 차트와 순위 목록으로 표시한다
 export default function StatsPage() {
   const navigate = useNavigate();
-  const stats = getStats();
+  const { user } = useAuth();
+  const { getStats, clearStats } = useStats();
+  const [stats, setStats] = useState<StatsMap | null>(null);
+
+  useEffect(() => {
+    getStats().then(setStats);
+  }, [user]);
+
+  if (!stats) {
+    return (
+      <div className="min-h-screen bg-paper flex items-center justify-center">
+        <span className="text-[10px] tracking-[0.22em] uppercase text-muted font-semibold">불러오는 중…</span>
+      </div>
+    );
+  }
 
   const sorted = (Object.entries(stats) as [MbtiType, number][]).sort(
     ([, a], [, b]) => b - a,
@@ -50,9 +68,10 @@ export default function StatsPage() {
     },
   };
 
-  function handleClear() {
+  // 확인 대화상자 후 모든 통계를 초기화하고 페이지를 새로고침한다
+  async function handleClear() {
     if (window.confirm('모든 통계를 초기화하시겠습니까?')) {
-      clearStats();
+      await clearStats();
       navigate(0);
     }
   }

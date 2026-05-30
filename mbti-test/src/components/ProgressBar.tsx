@@ -3,6 +3,7 @@ interface Props {
   total: number;
 }
 
+// 현재 진행 문항 수와 전체 문항 수를 받아 상단 진행바를 렌더링한다
 export default function ProgressBar({ current, total }: Props) {
   const pct = total === 0 ? 0 : (current / total) * 100;
 

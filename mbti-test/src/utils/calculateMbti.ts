@@ -10,6 +10,7 @@ export interface Scores {
   J: number; P: number;
 }
 
+// 12개 답변 배열을 받아 각 지표별 점수를 집계하고 MBTI 유형 문자열과 점수를 반환한다
 export function calculateMbti(answers: number[]): { type: MbtiType; scores: Scores } {
   const scores: Scores = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 };
 

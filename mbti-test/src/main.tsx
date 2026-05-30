@@ -11,11 +11,14 @@ import {
 } from 'chart.js';
 import './index.css';
 import App from './App.tsx';
+import { AuthProvider } from './context/AuthContext';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <AuthProvider>
+      <App />
+    </AuthProvider>
   </StrictMode>,
 );
