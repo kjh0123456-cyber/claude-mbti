@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>경품 추첨 — 워크숍</title>
+  <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #07071a;
+      --layer:       rgba(255,255,255,0.04);
+      --border:      rgba(255,255,255,0.09);
+      --gold:        #FFD700;
+      --gold-glow:   rgba(255,215,0,0.15);
+      --coffee:      #D4845A;
+      --coffee-glow: rgba(212,132,90,0.15);
+      --text:        #F0EEF8;
+      --muted:       rgba(240,238,248,0.45);
+    }
+
+    html, body {
+      min-height: 100dvh;
+      background:
+        radial-gradient(ellipse 90% 50% at 50% -10%, rgba(255,215,0,0.07) 0%, transparent 55%),
+        radial-gradient(ellipse 60% 40% at 85% 100%, rgba(90,60,180,0.08) 0%, transparent 50%),
+        var(--bg);
+      color: var(--text);
+      font-family: 'Noto Sans KR', sans-serif;
+      overflow-x: hidden;
+    }
+
+    #app {
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .screen { display: none; width: 100%; max-width: 420px; padding: 48px 24px 64px; }
+    .screen.active { display: block; animation: fadeUp .4s ease both; }
+    #s-loading.active, #s-drawing.active {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      min-height: 70dvh; gap: 28px;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── 공통 요소 ── */
+    .badge {
+      display: inline-block; font-size: 11px; letter-spacing: .2em;
+      text-transform: uppercase; color: var(--gold);
+      border: 1px solid rgba(255,215,0,.3);
+      padding: 5px 14px; border-radius: 100px; margin-bottom: 24px;
+      cursor: default; user-select: none;
+    }
+    h1.title {
+      font-family: 'Black Han Sans', sans-serif;
+      font-size: clamp(3rem, 14vw, 4.5rem); line-height: 1;
+      background: linear-gradient(130deg, #FFE566 0%, #FFD700 40%, #FFA500 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; margin-bottom: 14px;
+    }
+    .subtitle { font-size: 15px; color: var(--muted); line-height: 1.75; margin-bottom: 28px; }
+
+    .prizes-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 36px; }
+    .prize-chip { padding: 7px 15px; border-radius: 100px; font-size: 13px; font-weight: 700; }
+    .prize-chip.gold   { background: var(--gold-glow);   border: 1px solid rgba(255,215,0,.3);  color: var(--gold);   }
+    .prize-chip.coffee { background: var(--coffee-glow); border: 1px solid rgba(212,132,90,.3); color: var(--coffee); }
+
+    /* ── 폼 ── */
+    .field { margin-bottom: 14px; }
+    label {
+      display: block; font-size: 11px; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 7px;
+    }
+    input {
+      width: 100%; background: var(--layer); border: 1px solid var(--border);
+      border-radius: 12px; padding: 14px 16px; font-size: 16px;
+      font-family: 'Noto Sans KR', sans-serif; color: var(--text);
+      outline: none; transition: border-color .2s, box-shadow .2s;
+      -webkit-appearance: none;
+    }
+    input::placeholder { color: rgba(240,238,248,.2); }
+    input:focus {
+      border-color: rgba(255,215,0,.5);
+      box-shadow: 0 0 0 3px rgba(255,215,0,.07);
+    }
+    #btn-draw {
+      width: 100%; margin-top: 10px; padding: 17px; border: none;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #FFE566, #FFD700 40%, #FFA500);
+      color: #1a0f00; font-family: 'Black Han Sans', sans-serif;
+      font-size: 19px; letter-spacing: .04em; cursor: pointer;
+      position: relative; overflow: hidden;
+      transition: transform .15s, box-shadow .2s;
+      box-shadow: 0 4px 28px rgba(255,165,0,.25);
+    }
+    #btn-draw:active { transform: scale(.97); }
+    #btn-draw:disabled { opacity: .5; cursor: not-allowed; }
+    #btn-draw::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.28) 50%, transparent 100%);
+      transform: translateX(-100%); animation: shimmer 2.8s infinite 1.2s;
+    }
+    @keyframes shimmer { to { transform: translateX(100%); } }
+
+    /* ── 로딩 / 추첨 애니메이션 ── */
+    .orb-wrap {
+      position: relative; width: 150px; height: 150px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .orb-ring {
+      position: absolute; border-radius: 50%;
+      border: 1.5px solid transparent;
+    }
+    .ring-1 { width:150px;height:150px; border-color:rgba(255,215,0,.12); animation:spin 5s linear infinite; }
+    .ring-2 { width:110px;height:110px; border-color:rgba(255,215,0,.22); animation:spin 3s linear infinite reverse; }
+    .ring-3 { width: 72px;height: 72px; border-color:rgba(255,215,0,.4);  animation:spin 2s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .orb-core { font-size: 34px; animation: pulse 1s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.14)} }
+
+    .status-text { font-size: 15px; color: var(--muted); letter-spacing: .06em; animation: blink 1.3s ease-in-out infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.35} }
+
+    /* ── 결과 ── */
+    .result-card {
+      border-radius: 24px; padding: 40px 28px 36px; text-align: center;
+      border: 1px solid; margin-bottom: 20px;
+      animation: popIn .55s cubic-bezier(.34,1.56,.64,1) both;
+    }
+    @keyframes popIn { from{opacity:0;transform:scale(.65)} to{opacity:1;transform:scale(1)} }
+    .result-card.win-1 {
+      background: linear-gradient(135deg,rgba(255,215,0,.1),rgba(255,165,0,.06));
+      border-color: rgba(255,215,0,.38); box-shadow: 0 0 50px rgba(255,215,0,.12);
+    }
+    .result-card.win-2 {
+      background: linear-gradient(135deg,rgba(212,132,90,.1),rgba(139,69,19,.06));
+      border-color: rgba(212,132,90,.38); box-shadow: 0 0 50px rgba(212,132,90,.1);
+    }
+    .result-card.no-win { background: var(--layer); border-color: var(--border); }
+
+    .result-emoji { display:block; font-size:68px; margin-bottom:20px; animation: bounceIn .6s cubic-bezier(.34,1.56,.64,1) .12s both; }
+    @keyframes bounceIn { from{opacity:0;transform:scale(.3) translateY(20px)} to{opacity:1;transform:scale(1) translateY(0)} }
+    .result-rank { font-size:11px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; margin-bottom:10px; }
+    .win-1 .result-rank { color: var(--gold); }
+    .win-2 .result-rank { color: var(--coffee); }
+    .no-win .result-rank { color: var(--muted); }
+    .result-prize {
+      font-family: 'Black Han Sans', sans-serif;
+      font-size: clamp(1.7rem,7vw,2.3rem); line-height:1.15; margin-bottom:10px;
+    }
+    .win-1 .result-prize {
+      background: linear-gradient(135deg,#FFE566,#FFD700,#FFA500);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    }
+    .win-2 .result-prize { color: var(--coffee); }
+    .no-win .result-prize { color: var(--text); }
+    .result-desc { font-size:13px; color:var(--muted); line-height:1.7; margin-bottom:22px; }
+    .result-tag {
+      display:inline-flex; align-items:center; gap:6px;
+      background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1);
+      border-radius:100px; padding:6px 16px; font-size:13px; font-weight:700; color:var(--muted);
+    }
+
+    /* ── 버튼 ── */
+    .btn-next {
+      width:100%; padding:15px; border:1px solid var(--border); border-radius:12px;
+      background:transparent; color:var(--muted); font-family:'Noto Sans KR',sans-serif;
+      font-size:15px; cursor:pointer; transition:border-color .2s,color .2s,background .2s;
+    }
+    .btn-next:hover { border-color:rgba(255,255,255,.2); background:var(--layer); color:var(--text); }
+
+    /* ── 마감 화면 ── */
+    #s-closed { text-align:center; }
+    .closed-icon { display:block; font-size:64px; margin-bottom:28px; }
+    .closed-wrap h2 { font-family:'Black Han Sans',sans-serif; font-size:1.9rem; margin-bottom:16px; }
+    .closed-wrap p  { font-size:15px; color:var(--muted); line-height:1.8; margin-bottom:36px; }
+    .closed-meta    { font-size:11px; letter-spacing:.15em; text-transform:uppercase; color:rgba(240,238,248,.2); }
+
+    /* ── 미초기화 화면 ── */
+    #s-uninit { text-align:center; }
+    .uninit-icon { font-size:56px; display:block; margin-bottom:24px; }
+    #s-uninit h2 { font-family:'Black Han Sans',sans-serif; font-size:1.6rem; margin-bottom:12px; }
+    #s-uninit p  { font-size:14px; color:var(--muted); line-height:1.8; margin-bottom:28px; }
+    .btn-init {
+      display:inline-block; padding:14px 32px; border-radius:12px;
+      background: linear-gradient(135deg,#FFE566,#FFD700,#FFA500);
+      color:#1a0f00; font-family:'Black Han Sans',sans-serif;
+      font-size:16px; cursor:pointer; border:none;
+    }
+
+    /* ── 에러 메시지 ── */
+    .err-banner {
+      background: rgba(255,100,100,.12); border: 1px solid rgba(255,100,100,.3);
+      border-radius:10px; padding:12px 16px; font-size:13px;
+      color:#ff9a9a; margin-bottom:16px; display:none;
+    }
+    .err-banner.show { display:block; }
+
+    /* ── 컨페티 ── */
+    #confetti { position:fixed; inset:0; pointer-events:none; z-index:999; overflow:hidden; }
+    .cp {
+      position:absolute; top:-16px; border-radius:2px;
+      animation: fall var(--d) var(--delay) ease-in forwards;
+    }
+    @keyframes fall {
+      0%   { transform:translateY(0) rotate(0deg) translateX(0);         opacity:1; }
+      100% { transform:translateY(110dvh) rotate(720deg) translateX(var(--dx)); opacity:0; }
+    }
+
+    /* ── 관리자 패널 ── */
+    #admin {
+      display:none; position:fixed; bottom:16px; right:16px;
+      background:rgba(12,12,30,.96); border:1px solid rgba(255,255,255,.12);
+      border-radius:14px; padding:18px; z-index:1000; min-width:210px;
+      backdrop-filter:blur(12px);
+    }
+    #admin.open { display:block; animation:fadeUp .25s ease both; }
+    .admin-label { font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); margin-bottom:12px; }
+    .admin-btn {
+      display:block; width:100%; padding:9px 12px; border-radius:8px;
+      border:1px solid var(--border); background:transparent; color:var(--text);
+      font-family:'Noto Sans KR',sans-serif; font-size:13px; cursor:pointer;
+      text-align:left; margin-bottom:6px; transition:background .15s;
+    }
+    .admin-btn:hover { background:var(--layer); }
+    .admin-btn.red   { color:#ff7070; border-color:rgba(255,112,112,.3); }
+    #admin-info {
+      font-size:12px; color:var(--muted); line-height:1.85;
+      margin-top:10px; padding-top:10px; border-top:1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- 로딩 -->
+  <section id="s-loading" class="screen active">
+    <div class="orb-wrap">
+      <div class="orb-ring ring-1"></div>
+      <div class="orb-ring ring-2"></div>
+      <div class="orb-ring ring-3"></div>
+      <div class="orb-core">🎁</div>
+    </div>
+    <p class="status-text">연결 중…</p>
+  </section>
+
+  <!-- 미초기화 -->
+  <section id="s-uninit" class="screen">
+    <span class="uninit-icon">⚙️</span>
+    <h2>추첨 준비 중</h2>
+    <p>아직 추첨이 초기화되지 않았습니다.<br>관리자가 추첨을 시작해 주세요.</p>
+    <button class="btn-init" id="btn-admin-init" onclick="adminInit()">추첨 초기화 (관리자)</button>
+  </section>
+
+  <!-- 입력 폼 -->
+  <section id="s-form" class="screen">
+    <span class="badge" id="badge-tap">✦ WORKSHOP 2026</span>
+    <h1 class="title">경품 추첨</h1>
+    <p class="subtitle">이름과 부서를 입력하고<br>행운의 추첨에 참여하세요</p>
+
+    <div class="prizes-row">
+      <div class="prize-chip gold">🍗 1등 · 치킨 기프티콘</div>
+      <div class="prize-chip coffee">☕ 2등 · 커피 쿠폰</div>
+    </div>
+
+    <div class="err-banner" id="err-msg"></div>
+
+    <form id="form" onsubmit="handleSubmit(event)">
+      <div class="field">
+        <label>이름</label>
+        <input id="inp-name" type="text" placeholder="홍길동" maxlength="10"
+               autocomplete="off" autocorrect="off" spellcheck="false" required>
+      </div>
+      <div class="field">
+        <label>부서</label>
+        <input id="inp-dept" type="text" placeholder="개발팀" maxlength="20"
+               autocomplete="off" autocorrect="off" spellcheck="false" required>
+      </div>
+      <button type="submit" id="btn-draw">추첨하기 ✨</button>
+    </form>
+  </section>
+
+  <!-- 추첨 중 -->
+  <section id="s-drawing" class="screen">
+    <div class="orb-wrap">
+      <div class="orb-ring ring-1"></div>
+      <div class="orb-ring ring-2"></div>
+      <div class="orb-ring ring-3"></div>
+      <div class="orb-core">🎲</div>
+    </div>
+    <p class="status-text">행운을 고르는 중…</p>
+  </section>
+
+  <!-- 결과 -->
+  <section id="s-result" class="screen">
+    <div id="result-content"></div>
+    <button class="btn-next" onclick="show('s-form')">← 돌아가기</button>
+  </section>
+
+  <!-- 마감 -->
+  <section id="s-closed" class="screen">
+    <div class="closed-wrap">
+      <span class="closed-icon">🎊</span>
+      <h2>추첨이 종료되었습니다</h2>
+      <p>워크숍에 참여해 주셔서<br>감사합니다!</p>
+      <div class="closed-meta">2026 Workshop · End of Event</div>
+    </div>
+  </section>
+
+</div>
+
+<div id="confetti" aria-hidden="true"></div>
+
+<!-- 관리자 패널 (배지 5번 탭) -->
+<div id="admin">
+  <div class="admin-label">⚙ Admin Panel</div>
+  <button class="admin-btn" onclick="adminToggle()">추첨 마감 / 재오픈</button>
+  <button class="admin-btn" onclick="adminRefresh()">참여 현황 새로고침</button>
+  <button class="admin-btn red" onclick="adminReset()">전체 초기화</button>
+  <div id="admin-info"></div>
+  <button class="admin-btn" style="margin-top:8px;font-size:11px;color:var(--muted)"
+          onclick="document.getElementById('admin').classList.remove('open')">닫기</button>
+</div>
+
+<!-- Firebase SDK (CDN) -->
+<script type="module">
+import { initializeApp }   from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+import {
+  getFirestore, doc, getDoc, setDoc, deleteDoc,
+  runTransaction, serverTimestamp, collection, getDocs
+} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+
+/* ═══════════════════════════════════════════════════════
+   ▼▼▼  Firebase 설정 — .env의 값을 아래에 붙여넣으세요  ▼▼▼
+═══════════════════════════════════════════════════════ */
+const FIREBASE_CONFIG = {
+  apiKey:            "여기에_VITE_FIREBASE_API_KEY_값",
+  authDomain:        "여기에_VITE_FIREBASE_AUTH_DOMAIN_값",
+  projectId:         "여기에_VITE_FIREBASE_PROJECT_ID_값",
+  storageBucket:     "여기에_VITE_FIREBASE_STORAGE_BUCKET_값",
+  messagingSenderId: "여기에_VITE_FIREBASE_MESSAGING_SENDER_ID_값",
+  appId:             "여기에_VITE_FIREBASE_APP_ID_값",
+};
+/* ═══════════════════════════════════════════════════════
+   ▲▲▲  설정 영역 끝                                   ▲▲▲
+═══════════════════════════════════════════════════════ */
+
+/* ─── CONFIG ─── */
+const CFG = {
+  totalSlots:  60,
+  prizes: { chicken: 2, coffee: 10 },
+  drawDelay:   2300,
+  collection:  'raffle_2026',
+  stateDocId:  'state',
+  partColName: 'participants',
+};
+
+/* ─── Firebase 초기화 ─── */
+const app = initializeApp(FIREBASE_CONFIG);
+const db  = getFirestore(app);
+
+const stateRef = () => doc(db, CFG.collection, CFG.stateDocId);
+const partRef  = (key) => doc(db, CFG.collection, CFG.stateDocId, CFG.partColName, key);
+const partCol  = () => collection(db, CFG.collection, CFG.stateDocId, CFG.partColName);
+
+/* ─── 유틸 ─── */
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function participantKey(name, dept) {
+  /* Firestore document ID: 이름과 부서의 조합 (특수문자 제거) */
+  return (name + '__' + dept).replace(/[\/\.#\[\]]/g, '_');
+}
+
+/* ─── 화면 전환 ─── */
+window.show = function(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(id);
+  el.classList.remove('active');
+  void el.offsetWidth;
+  el.classList.add('active');
+};
+
+function showError(msg) {
+  const el = document.getElementById('err-msg');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 4000);
+}
+
+/* ─── Firestore: 상태 읽기 ─── */
+async function loadState() {
+  const snap = await getDoc(stateRef());
+  return snap.exists() ? snap.data() : null;
+}
+
+/* ─── Firestore: 초기화 ─── */
+async function createInitialState() {
+  const pool = Array(CFG.totalSlots).fill('none');
+  const positions = shuffle([...Array(CFG.totalSlots).keys()]);
+  positions.slice(0, CFG.prizes.chicken).forEach(i => { pool[i] = 'chicken'; });
+  positions.slice(CFG.prizes.chicken, CFG.prizes.chicken + CFG.prizes.coffee)
+           .forEach(i => { pool[i] = 'coffee'; });
+
+  await setDoc(stateRef(), {
+    pool, nextIdx: 0, closed: false,
+    createdAt: serverTimestamp(),
+  });
+}
+
+/* ─── Firestore: 추첨 (트랜잭션) ─── */
+async function drawPrize(name, dept) {
+  const key = participantKey(name, dept);
+
+  return await runTransaction(db, async (tx) => {
+    const [stateSnap, partSnap] = await Promise.all([
+      tx.get(stateRef()),
+      tx.get(partRef(key)),
+    ]);
+
+    /* 이미 참여한 경우 */
+    if (partSnap.exists()) {
+      return { prize: partSnap.data().prize, duplicate: true };
+    }
+
+    const state = stateSnap.data();
+    const prize = state.nextIdx < CFG.totalSlots
+      ? state.pool[state.nextIdx]
+      : 'none';
+
+    tx.update(stateRef(), { nextIdx: state.nextIdx + 1 });
+    tx.set(partRef(key), { name, dept, prize, ts: serverTimestamp() });
+
+    return { prize, duplicate: false };
+  });
+}
+
+/* ─── 제출 처리 ─── */
+window.handleSubmit = async function(e) {
+  e.preventDefault();
+  const name = document.getElementById('inp-name').value.trim();
+  const dept = document.getElementById('inp-dept').value.trim();
+  if (!name || !dept) return;
+
+  document.getElementById('btn-draw').disabled = true;
+  show('s-drawing');
+
+  try {
+    await new Promise(r => setTimeout(r, CFG.drawDelay));
+    const result = await drawPrize(name, dept);
+    renderResult(name, dept, result);
+  } catch (err) {
+    console.error(err);
+    show('s-form');
+    showError('네트워크 오류가 발생했습니다. 다시 시도해 주세요.');
+  } finally {
+    document.getElementById('btn-draw').disabled = false;
+  }
+};
+
+/* ─── 결과 렌더링 ─── */
+const PRIZE_META = {
+  chicken: { cls:'win-1', emoji:'🍗', rank:'🏆 1등 당첨', name:'치킨 기프티콘', desc:'담당자에게 연락하여 기프티콘을 수령해 주세요!' },
+  coffee:  { cls:'win-2', emoji:'☕', rank:'🥈 2등 당첨', name:'커피 쿠폰',     desc:'담당자에게 연락하여 쿠폰을 수령해 주세요!' },
+  none:    { cls:'no-win',emoji:'🎊', rank:'참여 완료',   name:'다음 기회에!',  desc:'참여해 주셔서 감사합니다 😊' },
+};
+
+function renderResult(name, dept, result) {
+  const meta = PRIZE_META[result.prize] ?? PRIZE_META.none;
+  document.getElementById('result-content').innerHTML = `
+    <div class="result-card ${meta.cls}">
+      <span class="result-emoji">${meta.emoji}</span>
+      <div class="result-rank">${result.duplicate ? '이미 참여하셨습니다' : meta.rank}</div>
+      <div class="result-prize">${meta.name}</div>
+      <div class="result-desc">${result.duplicate ? '동일한 이름/부서로 이미 참여하셨습니다.' : meta.desc}</div>
+      <div class="result-tag"><span>${name}</span><span style="opacity:.4">·</span><span>${dept}</span></div>
+    </div>
+  `;
+  show('s-result');
+  if (!result.duplicate && result.prize !== 'none') {
+    launchConfetti(result.prize === 'chicken' ? 90 : 45);
+  }
+}
+
+/* ─── 컨페티 ─── */
+const COLORS = ['#FFD700','#FFA500','#FF6B6B','#4ECDC4','#45B7D1','#96CEB4','#FFEAA7','#DDA0DD'];
+function launchConfetti(n) {
+  const box = document.getElementById('confetti');
+  box.innerHTML = '';
+  for (let i = 0; i < n; i++) {
+    const el = document.createElement('div');
+    el.className = 'cp';
+    el.style.cssText = `
+      left:${Math.random()*100}%;
+      width:${6+Math.random()*6}px; height:${10+Math.random()*8}px;
+      background:${COLORS[Math.floor(Math.random()*COLORS.length)]};
+      border-radius:${Math.random()>.5?'50%':'2px'};
+      transform:rotate(${Math.random()*360}deg);
+      --d:${2+Math.random()*2.2}s; --delay:${Math.random()*.7}s; --dx:${(Math.random()-.5)*220}px;
+    `;
+    box.appendChild(el);
+  }
+  setTimeout(() => { box.innerHTML = ''; }, 5500);
+}
+
+/* ─── 관리자 ─── */
+let tapCount = 0, tapTimer = null;
+document.getElementById('badge-tap').addEventListener('click', () => {
+  tapCount++;
+  clearTimeout(tapTimer);
+  if (tapCount >= 5) {
+    tapCount = 0;
+    document.getElementById('admin').classList.toggle('open');
+    adminRefresh();
+  } else {
+    tapTimer = setTimeout(() => { tapCount = 0; }, 1800);
+  }
+});
+
+window.adminInit = async function() {
+  if (!confirm('추첨을 초기화합니까? 기존 데이터가 있으면 삭제됩니다.')) return;
+  show('s-loading');
+  await createInitialState();
+  await init();
+};
+
+window.adminToggle = async function() {
+  const state = await loadState();
+  if (!state) return;
+  await setDoc(stateRef(), { ...state, closed: !state.closed });
+  if (!state.closed) show('s-closed');
+  else show('s-form');
+  alert(state.closed ? '✅ 추첨이 재오픈됐습니다.' : '✅ 추첨이 마감됐습니다.');
+  adminRefresh();
+};
+
+window.adminRefresh = async function() {
+  const [state, parts] = await Promise.all([loadState(), getDocs(partCol())]);
+  if (!state) { document.getElementById('admin-info').textContent = '상태 없음'; return; }
+  const wins = {};
+  parts.forEach(d => { const p = d.data().prize; wins[p] = (wins[p]||0)+1; });
+  document.getElementById('admin-info').innerHTML = `
+    총 참여: <strong>${parts.size}</strong>명<br>
+    🍗 1등: <strong>${wins.chicken||0}</strong> / ${CFG.prizes.chicken}명<br>
+    ☕ 2등: <strong>${wins.coffee||0}</strong> / ${CFG.prizes.coffee}명<br>
+    상태: ${state.closed ? '🔴 마감' : '🟢 진행 중'}
+  `;
+};
+
+window.adminReset = async function() {
+  if (!confirm('모든 참여 기록과 경품 데이터를 초기화합니까?\n되돌릴 수 없습니다.')) return;
+  show('s-loading');
+  /* 참여자 문서 전체 삭제 후 상태 문서 삭제 */
+  const parts = await getDocs(partCol());
+  await Promise.all(parts.docs.map(d => deleteDoc(d.ref)));
+  await deleteDoc(stateRef());
+  await init();
+};
+
+/* ─── 초기화 ─── */
+async function init() {
+  show('s-loading');
+  try {
+    const state = await loadState();
+    if (!state)         show('s-uninit');
+    else if (state.closed) show('s-closed');
+    else                show('s-form');
+  } catch (err) {
+    console.error(err);
+    show('s-uninit');
+  }
+}
+
+init();
+</script>
+</body>
+</html>
