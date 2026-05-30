@@ -35,26 +35,32 @@ export default function TestPage() {
   if (!question) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 flex flex-col items-center justify-center px-4 py-8">
-      <div className="max-w-lg w-full">
-        <div className="mb-8">
-          <ProgressBar current={current} total={questions.length} />
+    <div className="min-h-screen bg-paper">
+      <ProgressBar current={current} total={questions.length} />
+
+      <div className="max-w-2xl mx-auto px-8 sm:px-16 pt-16 pb-20">
+        <div className="flex justify-between items-center mb-20">
+          <button
+            type="button"
+            onClick={handleBack}
+            className="text-[10px] tracking-[0.2em] text-muted uppercase font-semibold hover:text-ink transition-colors duration-150"
+          >
+            ← 이전
+          </button>
+          <span className="text-[10px] tracking-[0.2em] text-muted uppercase font-semibold">
+            {current + 1}&thinsp;/&thinsp;{questions.length}
+          </span>
         </div>
 
-        <div className="bg-white rounded-3xl shadow-xl p-8 mb-6 min-h-[260px] flex flex-col justify-center">
-          <p className="text-xs font-semibold text-indigo-400 uppercase tracking-widest mb-4 text-center">
-            질문 {current + 1} / {questions.length}
+        <div className="mb-6 animate-fade-up" style={{ animationDelay: '0s' }}>
+          <p className="font-editorial text-[clamp(5rem,16vw,9.5rem)] font-bold text-line leading-none select-none">
+            Q.{String(current + 1).padStart(2, '0')}
           </p>
-          <QuestionCard question={question} onAnswer={handleAnswer} />
         </div>
 
-        <button
-          type="button"
-          onClick={handleBack}
-          className="text-gray-400 hover:text-gray-600 text-sm transition-colors duration-150 flex items-center gap-1"
-        >
-          ← 이전으로
-        </button>
+        <div className="h-px bg-line mb-10 animate-fade-up" style={{ animationDelay: '0.05s' }} />
+
+        <QuestionCard key={current} question={question} onAnswer={handleAnswer} />
       </div>
     </div>
   );

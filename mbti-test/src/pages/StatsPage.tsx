@@ -21,15 +21,15 @@ export default function StatsPage() {
       {
         label: '테스트 횟수',
         data,
-        backgroundColor: 'rgba(99, 102, 241, 0.7)',
-        borderColor: 'rgba(99, 102, 241, 1)',
-        borderWidth: 1,
-        borderRadius: 6,
+        backgroundColor: '#E8DC4A',
+        borderColor: '#E8DC4A',
+        borderWidth: 0,
+        borderRadius: 2,
       },
     ],
   };
 
-  const options = {
+  const chartOptions = {
     responsive: true,
     plugins: {
       legend: { display: false },
@@ -38,7 +38,14 @@ export default function StatsPage() {
     scales: {
       y: {
         beginAtZero: true,
-        ticks: { stepSize: 1 },
+        ticks: { stepSize: 1, color: '#918D87', font: { size: 11 } },
+        grid: { color: '#D0CBC0' },
+        border: { display: false },
+      },
+      x: {
+        ticks: { color: '#1A1916', font: { size: 11, weight: 'bold' as const } },
+        grid: { display: false },
+        border: { display: false },
       },
     },
   };
@@ -51,59 +58,80 @@ export default function StatsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 flex flex-col items-center py-10 px-4">
-      <div className="max-w-2xl w-full">
-        <div className="flex items-center justify-between mb-6">
+    <div className="min-h-screen bg-paper">
+      <div className="max-w-2xl mx-auto px-8 sm:px-16 pt-12 pb-24">
+
+        <div className="flex justify-between items-center mb-20 animate-fade-up">
           <button
             type="button"
             onClick={() => navigate('/')}
-            className="text-gray-400 hover:text-gray-600 text-sm transition-colors duration-150"
+            className="text-[10px] tracking-[0.2em] text-muted uppercase font-semibold hover:text-ink transition-colors duration-150"
           >
-            ← 홈으로
+            ← 홈
           </button>
-          <h1 className="text-2xl font-bold text-gray-800">성격 유형 통계</h1>
           <button
             type="button"
             onClick={handleClear}
-            className="text-red-400 hover:text-red-600 text-sm transition-colors duration-150"
+            className="text-[10px] tracking-[0.2em] text-muted uppercase font-semibold hover:text-ink transition-colors duration-150"
           >
             초기화
           </button>
         </div>
 
-        <div className="bg-white rounded-3xl shadow-xl p-6 mb-6">
-          <p className="text-center text-gray-500 text-sm mb-4">
+        <div className="animate-fade-up" style={{ animationDelay: '0.1s' }}>
+          <h1 className="font-editorial text-[clamp(3.5rem,11vw,7rem)] font-bold leading-[0.88] text-ink">
+            성격 유형
+          </h1>
+          <h1 className="font-editorial text-[clamp(3.5rem,11vw,7rem)] font-bold leading-[0.88] italic text-ink">
+            통계
+          </h1>
+        </div>
+
+        <div className="animate-fade-up mt-6 mb-10" style={{ animationDelay: '0.15s' }}>
+          <p className="text-[10px] tracking-[0.22em] uppercase text-muted font-semibold">
             총 {total}개의 테스트 결과
           </p>
+          <div className="h-[3px] w-12 bg-accent mt-5" />
+        </div>
+
+        <div className="h-px bg-line mb-10 animate-fade-up" style={{ animationDelay: '0.2s' }} />
+
+        <div className="animate-fade-up mb-14" style={{ animationDelay: '0.25s' }}>
           {total === 0 ? (
-            <div className="text-center py-10">
-              <p className="text-4xl mb-3">📭</p>
-              <p className="text-gray-400">아직 테스트 결과가 없습니다.</p>
+            <div className="border border-line py-20 flex flex-col items-center gap-5">
+              <p className="text-[10px] tracking-[0.22em] uppercase text-muted font-semibold">
+                아직 테스트 결과가 없습니다
+              </p>
               <button
                 type="button"
                 onClick={() => navigate('/test')}
-                className="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-3 rounded-xl transition-colors duration-150"
+                className="group flex items-center gap-2 bg-ink text-paper px-7 py-3.5 text-[11px] tracking-[0.18em] uppercase font-semibold hover:bg-accent hover:text-ink transition-colors duration-200"
               >
-                테스트 시작하기
+                테스트 시작
+                <span className="group-hover:translate-x-0.5 transition-transform duration-150">→</span>
               </button>
             </div>
           ) : (
-            <Bar data={chartData} options={options} />
+            <Bar data={chartData} options={chartOptions} />
           )}
         </div>
 
         {total > 0 && (
-          <div className="bg-white rounded-3xl shadow-xl p-6">
-            <h2 className="text-lg font-semibold text-gray-700 mb-4">순위</h2>
-            <ol className="space-y-2">
+          <div className="animate-fade-up" style={{ animationDelay: '0.3s' }}>
+            <div className="h-px bg-line mb-8" />
+            <p className="text-[9px] tracking-[0.22em] uppercase text-muted font-semibold mb-6">순위</p>
+            <ol>
               {sorted.filter(([, count]) => count > 0).map(([type, count], i) => (
-                <li key={type} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
-                  <span className="flex items-center gap-3">
-                    <span className="text-gray-400 text-sm w-5">{i + 1}</span>
-                    <span className="font-semibold text-indigo-600">{type}</span>
+                <li
+                  key={type}
+                  className="flex items-center justify-between py-4 border-b border-line"
+                >
+                  <span className="flex items-center gap-6">
+                    <span className="text-[10px] text-muted font-semibold w-4 shrink-0">{i + 1}</span>
+                    <span className="font-editorial text-2xl font-bold text-ink">{type}</span>
                   </span>
-                  <span className="text-gray-500 text-sm">
-                    {count}회 ({Math.round((count / total) * 100)}%)
+                  <span className="text-[11px] text-muted">
+                    {count}회&nbsp;&nbsp;·&nbsp;&nbsp;{Math.round((count / total) * 100)}%
                   </span>
                 </li>
               ))}

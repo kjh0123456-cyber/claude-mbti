@@ -12,12 +12,12 @@ export default function ResultPage() {
 
   if (!type || !(type in mbtiProfiles)) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-gray-50">
-        <p className="text-gray-500 text-lg">유효하지 않은 유형입니다.</p>
+      <div className="min-h-screen bg-paper flex flex-col items-center justify-center gap-6">
+        <p className="text-[10px] tracking-[0.22em] uppercase text-muted font-semibold">유효하지 않은 유형입니다.</p>
         <button
           type="button"
           onClick={() => navigate('/')}
-          className="bg-indigo-600 text-white px-6 py-3 rounded-xl"
+          className="text-[11px] tracking-[0.2em] uppercase border-b border-ink hover:border-accent hover:text-muted pb-0.5 transition-colors duration-150"
         >
           처음으로
         </button>
@@ -47,55 +47,113 @@ export default function ResultPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 flex flex-col items-center py-10 px-4">
-      <div className="max-w-md w-full">
-        <h1 className="text-2xl font-bold text-gray-800 text-center mb-6">
-          나의 성격 유형
-        </h1>
+    <div className="min-h-screen bg-paper">
+      <div className="max-w-2xl mx-auto px-8 sm:px-16 pt-12 pb-24">
 
-        <ResultCard ref={cardRef} profile={profile} />
+        <div className="flex justify-between items-center mb-20 animate-fade-up">
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            className="text-[10px] tracking-[0.2em] text-muted uppercase font-semibold hover:text-ink transition-colors duration-150"
+          >
+            ← 홈
+          </button>
+          <span className="text-[10px] tracking-[0.2em] text-muted uppercase font-semibold">나의 성격 유형</span>
+        </div>
 
-        <div className="mt-6 flex gap-3">
+        <div className="animate-fade-up" style={{ animationDelay: '0.1s' }}>
+          <h1 className="font-editorial text-[clamp(6rem,20vw,12rem)] font-bold leading-none text-ink tracking-tight">
+            {type}
+          </h1>
+        </div>
+
+        <div className="animate-fade-up" style={{ animationDelay: '0.15s' }}>
+          <p className="text-base font-medium text-muted mt-3 mb-6">{profile.nickname}</p>
+          <div className="h-[3px] w-12 bg-accent mb-10" />
+        </div>
+
+        <div className="animate-fade-up" style={{ animationDelay: '0.2s' }}>
+          <p className="text-sm text-ink leading-relaxed max-w-prose mb-10">{profile.description}</p>
+        </div>
+
+        <div className="h-px bg-line mb-10 animate-fade-up" style={{ animationDelay: '0.25s' }} />
+
+        <div className="grid grid-cols-2 gap-10 mb-10 animate-fade-up" style={{ animationDelay: '0.3s' }}>
+          <div>
+            <p className="text-[9px] tracking-[0.22em] uppercase text-muted font-semibold mb-5">강점</p>
+            <ul className="space-y-2.5">
+              {profile.strengths.map(s => (
+                <li key={s} className="flex items-start gap-3 text-sm text-ink">
+                  <span className="text-muted mt-px shrink-0">—</span>
+                  <span>{s}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <p className="text-[9px] tracking-[0.22em] uppercase text-muted font-semibold mb-5">약점</p>
+            <ul className="space-y-2.5">
+              {profile.weaknesses.map(w => (
+                <li key={w} className="flex items-start gap-3 text-sm text-ink">
+                  <span className="text-muted mt-px shrink-0">—</span>
+                  <span>{w}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <div className="h-px bg-line mb-10" />
+
+        <div className="mb-8 animate-fade-up" style={{ animationDelay: '0.35s' }}>
+          <p className="text-[9px] tracking-[0.22em] uppercase text-muted font-semibold mb-3">추천 직업</p>
+          <p className="text-sm text-ink">{profile.careers.join(' · ')}</p>
+        </div>
+
+        <div className="mb-14 animate-fade-up" style={{ animationDelay: '0.4s' }}>
+          <p className="text-[9px] tracking-[0.22em] uppercase text-muted font-semibold mb-3">잘 맞는 유형</p>
+          <p className="text-sm text-ink">{profile.compatibility.join(', ')}</p>
+        </div>
+
+        <div className="h-px bg-line mb-10" />
+
+        <div className="flex flex-col sm:flex-row gap-2.5 animate-fade-up" style={{ animationDelay: '0.45s' }}>
+          <button
+            type="button"
+            onClick={() => navigate('/test')}
+            className="group flex-1 flex items-center justify-center gap-2 bg-ink text-paper py-3.5 text-[11px] tracking-[0.18em] uppercase font-semibold hover:bg-accent hover:text-ink transition-colors duration-200"
+          >
+            다시 테스트
+            <span className="group-hover:translate-x-0.5 transition-transform duration-150">→</span>
+          </button>
           <button
             type="button"
             onClick={handleDownload}
-            className="flex-1 bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 font-medium py-3 rounded-xl transition-colors duration-150"
+            className="flex-1 py-3.5 text-[11px] tracking-[0.18em] uppercase font-semibold border border-line text-ink hover:border-ink hover:bg-surface transition-colors duration-150"
           >
-            📷 이미지 저장
+            이미지 저장
           </button>
           <button
             type="button"
             onClick={handleShare}
-            className="flex-1 bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 font-medium py-3 rounded-xl transition-colors duration-150"
+            className="flex-1 py-3.5 text-[11px] tracking-[0.18em] uppercase font-semibold border border-line text-ink hover:border-ink hover:bg-surface transition-colors duration-150"
           >
-            🔗 공유하기
-          </button>
-        </div>
-
-        <div className="mt-4 flex gap-3">
-          <button
-            type="button"
-            onClick={() => navigate('/test')}
-            className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl transition-colors duration-150"
-          >
-            다시 테스트
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate('/stats')}
-            className="flex-1 bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 font-medium py-3 rounded-xl transition-colors duration-150"
-          >
-            📊 통계 보기
+            공유하기
           </button>
         </div>
 
         <button
           type="button"
-          onClick={() => navigate('/')}
-          className="mt-4 w-full text-center text-gray-400 hover:text-gray-600 text-sm transition-colors duration-150"
+          onClick={() => navigate('/stats')}
+          className="mt-5 w-full text-center text-[10px] tracking-[0.18em] text-muted uppercase hover:text-ink transition-colors duration-150 py-2"
         >
-          처음으로 돌아가기
+          통계 보기
         </button>
+      </div>
+
+      {/* Hidden card for image export */}
+      <div style={{ position: 'absolute', left: '-9999px', top: 0 }}>
+        <ResultCard ref={cardRef} profile={profile} />
       </div>
     </div>
   );
