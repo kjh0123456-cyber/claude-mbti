@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>주간 일정 — 2026. 06</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;0,700;1,700&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #090806;
+      --surface:   #121109;
+      --surface-2: #1C1A15;
+      --border:    #272420;
+      --text:      #EAE6DC;
+      --dim:       #8A8278;
+      --muted:     #4A4640;
+      --accent:    #E8DC4A;
+      --accent-dim: rgba(232,220,74,0.12);
+
+      --room-a:    #60A5FA;
+      --room-b:    #A78BFA;
+      --room-c:    #F472B6;
+      --online:    #34D399;
+      --external:  #FBBF24;
+      --cafeteria: #FB923C;
+      --ceo:       #F87171;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Dot grid */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: radial-gradient(circle, rgba(255,255,255,0.055) 1px, transparent 1px);
+      background-size: 28px 28px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Edge vignette */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse 120% 100% at 50% 50%, transparent 45%, rgba(0,0,0,0.65) 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Top accent strip */
+    .top-strip {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent) 0%, rgba(232,220,74,0.3) 60%, transparent 100%);
+      z-index: 100;
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 1380px;
+      margin: 0 auto;
+      padding: 0 52px 100px;
+    }
+
+    /* ─── HEADER ─── */
+    .header {
+      padding: 72px 0 52px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 48px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 32px;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeUp 0.7s cubic-bezier(0.22,1,0.36,1) 0.05s forwards;
+    }
+
+    .header-eyebrow {
+      font-size: 9px;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 600;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-eyebrow::before {
+      content: '';
+      display: inline-block;
+      width: 20px;
+      height: 1px;
+      background: var(--accent);
+    }
+
+    .header-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(5rem, 10vw, 8.5rem);
+      font-weight: 700;
+      line-height: 0.87;
+      letter-spacing: -0.02em;
+    }
+
+    .header-title .highlight {
+      font-style: italic;
+      color: var(--accent);
+      display: inline-block;
+    }
+
+    .header-right {
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .header-range {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--dim);
+      letter-spacing: 0.07em;
+      margin-bottom: 10px;
+    }
+
+    .header-count {
+      font-size: 9px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .today-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--accent-dim);
+      border: 1px solid rgba(232,220,74,0.25);
+      color: var(--accent);
+      font-size: 8px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      font-weight: 600;
+      padding: 3px 8px;
+      margin-top: 10px;
+    }
+
+    .today-pill::before {
+      content: '';
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 2s ease infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* ─── LEGEND ─── */
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px 18px;
+      margin-bottom: 52px;
+      opacity: 0;
+      animation: fadeUp 0.5s ease 0.25s forwards;
+    }
+
+    .legend-label {
+      font-size: 9px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 600;
+      margin-right: 4px;
+    }
+
+    .leg {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      color: var(--dim);
+      letter-spacing: 0.04em;
+    }
+
+    .leg-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* ─── GRID ─── */
+    .week-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 14px;
+      align-items: start;
+    }
+
+    /* ─── DAY COLUMN ─── */
+    .day-col {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .day-head {
+      padding-bottom: 14px;
+      margin-bottom: 4px;
+      border-bottom: 2px solid var(--border);
+      position: relative;
+      opacity: 0;
+      animation: fadeUp 0.45s ease forwards;
+    }
+
+    .day-head.today-col {
+      border-bottom-color: var(--accent);
+    }
+
+    .day-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.8rem;
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -0.02em;
+    }
+
+    .day-head.today-col .day-name {
+      color: var(--accent);
+    }
+
+    .day-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      margin-top: 5px;
+    }
+
+    .day-ev-count {
+      font-size: 8px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 5px;
+    }
+
+    /* ─── EVENT CARD ─── */
+    .ev {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid currentColor;
+      padding: 13px 13px 11px;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .ev.in {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .ev:hover {
+      background: var(--surface-2);
+      transform: translateY(-2px) !important;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+
+    .ev-time {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+      margin-bottom: 7px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ev-time::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .ev-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.35;
+      margin-bottom: 10px;
+      letter-spacing: -0.01em;
+    }
+
+    .ev-meta {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .ev-loc {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--dim);
+      font-weight: 500;
+    }
+
+    .ev-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .ev-sep {
+      width: 1px;
+      height: 9px;
+      background: var(--border);
+    }
+
+    .ev-who {
+      font-size: 9px;
+      letter-spacing: 0.07em;
+      color: var(--muted);
+    }
+
+    /* ─── FOOTER ─── */
+    .page-footer {
+      margin-top: 72px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      opacity: 0;
+      animation: fadeUp 0.5s ease 0.9s forwards;
+    }
+
+    .footer-copy {
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .footer-mark {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 18px;
+      font-style: italic;
+      color: var(--muted);
+    }
+
+    /* ─── ANIMATIONS ─── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 1200px) {
+      .week-grid { grid-template-columns: repeat(3, 1fr); }
+      .wrap { padding: 0 32px 80px; }
+    }
+
+    @media (max-width: 760px) {
+      .week-grid { grid-template-columns: 1fr 1fr; }
+      .wrap { padding: 0 20px 64px; }
+      .header { flex-direction: column; align-items: flex-start; }
+      .header-right { text-align: left; }
+    }
+
+    @media (max-width: 480px) {
+      .week-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="top-strip"></div>
+
+<div class="wrap">
+
+  <!-- HEADER -->
+  <header class="header">
+    <div>
+      <p class="header-eyebrow">2026년 23주차</p>
+      <h1 class="header-title">
+        주간<br>
+        <span class="highlight">일정표</span>
+      </h1>
+    </div>
+    <div class="header-right">
+      <p class="header-range">2026–06–01 ─── 2026–06–05</p>
+      <p class="header-count">총 10개 일정 · 5일 · 6명 참여</p>
+      <div class="today-pill">오늘 · 06 / 01</div>
+    </div>
+  </header>
+
+  <!-- LEGEND -->
+  <nav class="legend" aria-label="장소 범례">
+    <span class="legend-label">장소</span>
+    <span class="leg"><span class="leg-dot" style="background:var(--room-a)"></span>회의실 A</span>
+    <span class="leg"><span class="leg-dot" style="background:var(--room-b)"></span>회의실 B</span>
+    <span class="leg"><span class="leg-dot" style="background:var(--room-c)"></span>회의실 C</span>
+    <span class="leg"><span class="leg-dot" style="background:var(--online)"></span>온라인</span>
+    <span class="leg"><span class="leg-dot" style="background:var(--external)"></span>외부</span>
+    <span class="leg"><span class="leg-dot" style="background:var(--cafeteria)"></span>카페테리아</span>
+    <span class="leg"><span class="leg-dot" style="background:var(--ceo)"></span>대표실</span>
+  </nav>
+
+  <!-- WEEK GRID -->
+  <main class="week-grid">
+
+    <!-- MON -->
+    <div class="day-col">
+      <div class="day-head today-col" style="animation-delay:0.3s">
+        <div class="day-name">월</div>
+        <div class="day-num">06 / 01</div>
+        <div class="day-ev-count">1 일정</div>
+      </div>
+      <article class="ev" style="color:var(--room-b)" data-delay="380">
+        <div class="ev-time">14:00</div>
+        <div class="ev-title">신규 프로젝트 킥오프</div>
+        <div class="ev-meta">
+          <span class="ev-loc"><span class="ev-dot" style="background:var(--room-b)"></span>회의실 B</span>
+          <span class="ev-sep"></span>
+          <span class="ev-who">김종해</span>
+        </div>
+      </article>
+    </div>
+
+    <!-- TUE -->
+    <div class="day-col">
+      <div class="day-head" style="animation-delay:0.36s">
+        <div class="day-name">화</div>
+        <div class="day-num">06 / 02</div>
+        <div class="day-ev-count">2 일정</div>
+      </div>
+      <article class="ev" style="color:var(--online)" data-delay="440">
+        <div class="ev-time">10:00</div>
+        <div class="ev-title">UX 리뷰</div>
+        <div class="ev-meta">
+          <span class="ev-loc"><span class="ev-dot" style="background:var(--online)"></span>온라인</span>
+          <span class="ev-sep"></span>
+          <span class="ev-who">한소희</span>
+        </div>
+      </article>
+      <article class="ev" style="color:var(--external)" data-delay="500">
+        <div class="ev-time">15:00</div>
+        <div class="ev-title">클라이언트 미팅</div>
+        <div class="ev-meta">
+          <span class="ev-loc"><span class="ev-dot" style="background:var(--external)"></span>외부</span>
+          <span class="ev-sep"></span>
+          <span class="ev-who">영업팀</span>
+        </div>
+      </article>
+    </div>
+
+    <!-- WED -->
+    <div class="day-col">
+      <div class="day-head" style="animation-delay:0.42s">
+        <div class="day-name">수</div>
+        <div class="day-num">06 / 03</div>
+        <div class="day-ev-count">2 일정</div>
+      </div>
+      <article class="ev" style="color:var(--room-a)" data-delay="560">
+        <div class="ev-time">09:30</div>
+        <div class="ev-title">개발 스프린트 점검</div>
+        <div class="ev-meta">
+          <span class="ev-loc"><span class="ev-dot" style="background:var(--room-a)"></span>회의실 A</span>
+          <span class="ev-sep"></span>
+          <span class="ev-who">개발팀</span>
+        </div>
+      </article>
+      <article class="ev" style="color:var(--cafeteria)" data-delay="620">
+        <div class="ev-time">13:00</div>
+        <div class="ev-title">점심 세미나</div>
+        <div class="ev-meta">
+          <span class="ev-loc"><span class="ev-dot" style="background:var(--cafeteria)"></span>카페테리아</span>
+          <span class="ev-sep"></span>
+          <span class="ev-who">전체</span>
+        </div>
+      </article>
+    </div>
+
+    <!-- THU -->
+    <div class="day-col">
+      <div class="day-head" style="animation-delay:0.48s">
+        <div class="day-name">목</div>
+        <div class="day-num">06 / 04</div>
+        <div class="day-ev-count">2 일정</div>
+      </div>
+      <article class="ev" style="color:var(--room-c)" data-delay="680">
+        <div class="ev-time">10:00</div>
+        <div class="ev-title">마케팅 전략 회의</div>
+        <div class="ev-meta">
+          <span class="ev-loc"><span class="ev-dot" style="background:var(--room-c)"></span>회의실 C</span>
+          <span class="ev-sep"></span>
+          <span class="ev-who">마케팅팀</span>
+        </div>
+      </article>
+      <article class="ev" style="color:var(--ceo)" data-delay="740">
+        <div class="ev-time">16:00</div>
+        <div class="ev-title">1:1 면담</div>
+        <div class="ev-meta">
+          <span class="ev-loc"><span class="ev-dot" style="background:var(--ceo)"></span>대표실</span>
+          <span class="ev-sep"></span>
+          <span class="ev-who">김종해</span>
+        </div>
+      </article>
+    </div>
+
+    <!-- FRI -->
+    <div class="day-col">
+      <div class="day-head" style="animation-delay:0.54s">
+        <div class="day-name">금</div>
+        <div class="day-num">06 / 05</div>
+        <div class="day-ev-count">3 일정</div>
+      </div>
+      <article class="ev" style="color:var(--room-a)" data-delay="800">
+        <div class="ev-time">09:00</div>
+        <div class="ev-title">주간 성과 리뷰</div>
+        <div class="ev-meta">
+          <span class="ev-loc"><span class="ev-dot" style="background:var(--room-a)"></span>회의실 A</span>
+          <span class="ev-sep"></span>
+          <span class="ev-who">전체</span>
+        </div>
+      </article>
+      <article class="ev" style="color:var(--online)" data-delay="860">
+        <div class="ev-time">14:00</div>
+        <div class="ev-title">다음주 계획 수립</div>
+        <div class="ev-meta">
+          <span class="ev-loc"><span class="ev-dot" style="background:var(--online)"></span>온라인</span>
+          <span class="ev-sep"></span>
+          <span class="ev-who">팀장급</span>
+        </div>
+      </article>
+      <article class="ev" style="color:var(--room-b)" data-delay="920">
+        <div class="ev-time">17:00</div>
+        <div class="ev-title">주간 마감 보고</div>
+        <div class="ev-meta">
+          <span class="ev-loc"><span class="ev-dot" style="background:var(--room-b)"></span>회의실 B</span>
+          <span class="ev-sep"></span>
+          <span class="ev-who">전체</span>
+        </div>
+      </article>
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="page-footer">
+    <span class="footer-copy">© 2026 · 성격 유형 연구소</span>
+    <span class="footer-mark">Jun. 2026</span>
+  </footer>
+
+</div>
+
+<script>
+  // Staggered card reveal on load
+  document.querySelectorAll('.ev').forEach(card => {
+    const delay = parseInt(card.dataset.delay || '400', 10);
+    setTimeout(() => {
+      card.style.transition = 'opacity 0.42s cubic-bezier(0.22,1,0.36,1), transform 0.42s cubic-bezier(0.22,1,0.36,1), background 0.18s ease, box-shadow 0.18s ease';
+      card.classList.add('in');
+    }, delay);
+  });
+</script>
+
+</body>
+</html>

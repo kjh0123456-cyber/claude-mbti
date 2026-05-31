@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import { onAuthStateChanged, signInWithPopup, signOut as firebaseSignOut, type User } from 'firebase/auth';
+import { onAuthStateChanged, signInWithPopup, signOut as firebaseSignOut, type User, type AuthError } from 'firebase/auth';
 import { auth, googleProvider } from '../firebase';
 import { getStats, clearStats } from '../utils/statsStorage';
 import { migrateLocalToCloud } from '../utils/cloudStatsStorage';
@@ -27,12 +27,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Google 팝업으로 로그인하고, localStorage에 기존 통계가 있으면 Firestore로 마이그레이션한다
   async function signIn() {
-    const result = await signInWithPopup(auth, googleProvider);
-    const localStats = getStats();
-    const hasLocalData = Object.values(localStats).some(v => v > 0);
-    if (hasLocalData) {
-      await migrateLocalToCloud(result.user.uid, localStats);
-      clearStats();
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const localStats = getStats();
+      const hasLocalData = Object.values(localStats).some(v => v > 0);
+      if (hasLocalData) {
+        await migrateLocalToCloud(result.user.uid, localStats);
+        clearStats();
+      }
+    } catch (error) {
+      const code = (error as AuthError).code;
+      // 사용자가 팝업을 닫거나 중복 요청한 경우 — 정상적인 취소이므로 무시한다
+      if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') return;
+      throw error;
     }
   }
 
