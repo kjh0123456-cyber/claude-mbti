@@ -2,12 +2,17 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>주간 일정 — 2026. 06</title>
+  <meta name="theme-color" content="#090806">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="일정표">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="schedule-icon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;0,700;1,700&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,700;1,700&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -42,775 +47,717 @@
 
     body::before {
       content: '';
-      position: fixed;
-      inset: 0;
-      background-image: radial-gradient(circle, rgba(255,255,255,0.055) 1px, transparent 1px);
+      position: fixed; inset: 0;
+      background-image: radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px);
       background-size: 28px 28px;
-      pointer-events: none;
-      z-index: 0;
+      pointer-events: none; z-index: 0;
     }
 
     body::after {
       content: '';
-      position: fixed;
-      inset: 0;
-      background: radial-gradient(ellipse 120% 100% at 50% 50%, transparent 45%, rgba(0,0,0,0.65) 100%);
-      pointer-events: none;
-      z-index: 0;
+      position: fixed; inset: 0;
+      background: radial-gradient(ellipse 120% 100% at 50% 50%, transparent 45%, rgba(0,0,0,0.6) 100%);
+      pointer-events: none; z-index: 0;
     }
 
     .top-strip {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      height: 3px;
-      background: linear-gradient(90deg, var(--accent) 0%, rgba(232,220,74,0.3) 60%, transparent 100%);
-      z-index: 100;
+      position: fixed; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--accent), rgba(232,220,74,0.3) 60%, transparent);
+      z-index: 200;
     }
 
-    .wrap {
-      position: relative;
-      z-index: 1;
+    /* ─── APP SHELL ─── */
+    .app {
+      position: relative; z-index: 1;
+      padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .view-wrap {
       max-width: 1380px;
       margin: 0 auto;
-      padding: 0 52px 100px;
+      padding: 0 52px 60px;
     }
 
     /* ─── HEADER ─── */
     .header {
-      padding: 72px 0 52px;
+      padding: 64px 0 44px;
       border-bottom: 1px solid var(--border);
-      margin-bottom: 48px;
+      margin-bottom: 44px;
       display: flex;
       align-items: flex-end;
       justify-content: space-between;
-      gap: 32px;
-      opacity: 0;
-      transform: translateY(20px);
-      animation: fadeUp 0.7s cubic-bezier(0.22,1,0.36,1) 0.05s forwards;
+      gap: 24px;
+      animation: fadeUp .7s cubic-bezier(.22,1,.36,1) .05s both;
     }
 
     .header-eyebrow {
-      font-size: 9px;
-      letter-spacing: 0.32em;
-      text-transform: uppercase;
-      color: var(--muted);
-      font-weight: 600;
-      margin-bottom: 14px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      font-size: 9px; letter-spacing: .32em; text-transform: uppercase;
+      color: var(--muted); font-weight: 600; margin-bottom: 12px;
+      display: flex; align-items: center; gap: 10px;
     }
-
     .header-eyebrow::before {
-      content: '';
-      display: inline-block;
-      width: 20px;
-      height: 1px;
-      background: var(--accent);
+      content: ''; width: 20px; height: 1px; background: var(--accent);
     }
 
     .header-title {
       font-family: 'Cormorant Garamond', serif;
       font-size: clamp(5rem, 10vw, 8.5rem);
-      font-weight: 700;
-      line-height: 0.87;
-      letter-spacing: -0.02em;
+      font-weight: 700; line-height: .87; letter-spacing: -.02em;
     }
+    .header-title .hi { font-style: italic; color: var(--accent); }
 
-    .header-title .highlight {
-      font-style: italic;
-      color: var(--accent);
-    }
-
-    .header-right {
-      text-align: right;
-      flex-shrink: 0;
-    }
+    .header-right { text-align: right; flex-shrink: 0; }
 
     .header-range {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      color: var(--dim);
-      letter-spacing: 0.07em;
-      margin-bottom: 10px;
+      font-size: 11px; color: var(--dim); letter-spacing: .07em; margin-bottom: 8px;
     }
-
-    .header-count {
-      font-size: 9px;
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
+    .header-count { font-size: 9px; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); }
 
     .today-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      background: var(--accent-dim);
-      border: 1px solid rgba(232,220,74,0.25);
-      color: var(--accent);
-      font-size: 8px;
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-      font-weight: 600;
-      padding: 3px 8px;
-      margin-top: 10px;
+      display: inline-flex; align-items: center; gap: 5px;
+      background: var(--accent-dim); border: 1px solid rgba(232,220,74,.25);
+      color: var(--accent); font-size: 8px; letter-spacing: .22em;
+      text-transform: uppercase; font-weight: 600; padding: 3px 8px; margin-top: 8px;
     }
-
     .today-pill::before {
-      content: '';
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
-      background: var(--accent);
-      animation: pulse 2s ease infinite;
+      content: ''; width: 5px; height: 5px; border-radius: 50%;
+      background: var(--accent); animation: pulse 2s ease infinite;
     }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
+    /* Desktop view toggle */
+    .view-toggle {
+      display: flex; gap: 3px; margin-top: 14px;
     }
+    .vtog {
+      font-size: 9px; letter-spacing: .2em; text-transform: uppercase; font-weight: 600;
+      padding: 5px 12px; background: none; border: 1px solid var(--border);
+      color: var(--muted); cursor: pointer; transition: all .15s;
+    }
+    .vtog.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
 
     /* ─── LEGEND ─── */
     .legend {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 6px 18px;
-      margin-bottom: 52px;
-      opacity: 0;
-      animation: fadeUp 0.5s ease 0.25s forwards;
+      display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px;
+      margin-bottom: 44px; animation: fadeUp .5s ease .25s both;
     }
-
     .legend-label {
-      font-size: 9px;
-      letter-spacing: 0.28em;
-      text-transform: uppercase;
-      color: var(--muted);
-      font-weight: 600;
-      margin-right: 4px;
+      font-size: 9px; letter-spacing: .28em; text-transform: uppercase;
+      color: var(--muted); font-weight: 600;
     }
+    .leg { display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--dim); }
+    .leg-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
 
-    .leg {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 10px;
-      color: var(--dim);
-    }
-
-    .leg-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-
-    /* ─── MOBILE DAY TABS (hidden on desktop) ─── */
+    /* ─── DAY TABS (mobile) ─── */
     .day-tabs { display: none; }
 
     /* ─── WEEK GRID ─── */
-    .week-grid {
+    #week-content {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
       gap: 14px;
       align-items: start;
     }
 
-    /* ─── DAY COLUMN ─── */
-    .day-col {
-      display: flex;
-      flex-direction: column;
-      gap: 9px;
-    }
+    .day-col { display: flex; flex-direction: column; gap: 9px; }
 
     .day-head {
-      padding-bottom: 14px;
-      margin-bottom: 4px;
+      padding-bottom: 14px; margin-bottom: 4px;
       border-bottom: 2px solid var(--border);
-      opacity: 0;
-      animation: fadeUp 0.45s ease forwards;
+      animation: fadeUp .45s ease both;
     }
-
     .day-head.today-col { border-bottom-color: var(--accent); }
-
     .day-name {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 2.8rem;
-      font-weight: 700;
-      line-height: 1;
-      letter-spacing: -0.02em;
+      font-size: 2.8rem; font-weight: 700; line-height: 1; letter-spacing: -.02em;
     }
-
     .day-head.today-col .day-name { color: var(--accent); }
-
-    .day-num {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      color: var(--muted);
-      letter-spacing: 0.1em;
-      margin-top: 5px;
-    }
-
-    .day-ev-count {
-      font-size: 8px;
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-top: 5px;
-    }
+    .day-num { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); margin-top: 4px; }
+    .day-ev-count { font-size: 8px; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
 
     /* ─── EVENT CARD ─── */
     .ev {
-      background: var(--surface);
-      border: 1px solid var(--border);
+      position: relative;
+      background: var(--surface); border: 1px solid var(--border);
       border-left: 3px solid currentColor;
-      padding: 13px 13px 11px;
-      opacity: 0;
-      transform: translateY(10px);
-      transition: background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+      padding: 13px 40px 11px 13px;
+      opacity: 0; transform: translateY(8px);
+      transition: background .18s, transform .18s, box-shadow .18s, opacity .18s;
     }
+    .ev.show { opacity: 1; transform: none; }
+    .ev.done { opacity: .55; }
+    .ev:hover { background: var(--surface-2); transform: translateY(-1px) !important; box-shadow: 0 8px 28px rgba(0,0,0,.4); }
 
-    .ev.in {
-      opacity: 1;
-      transform: translateY(0);
+    .ev-check {
+      position: absolute; top: 11px; right: 11px;
+      width: 22px; height: 22px; border-radius: 50%;
+      border: 1.5px solid currentColor; background: transparent;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      color: inherit; opacity: .45; transition: opacity .15s, background .15s;
+      -webkit-tap-highlight-color: transparent; touch-action: manipulation;
     }
-
-    .ev:hover {
-      background: var(--surface-2);
-      transform: translateY(-2px) !important;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-    }
+    .ev-check:hover { opacity: 1; }
+    .ev.done .ev-check { background: currentColor; color: var(--bg); opacity: 1; }
+    .ev.done .ev-title { text-decoration: line-through; opacity: .5; }
 
     .ev-time {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10.5px;
-      font-weight: 500;
-      letter-spacing: 0.05em;
-      color: var(--accent);
-      margin-bottom: 7px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      font-family: 'JetBrains Mono', monospace; font-size: 10.5px; font-weight: 500;
+      color: var(--accent); margin-bottom: 7px; display: flex; align-items: center; gap: 8px;
+    }
+    .ev-time::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .ev-title { font-size: 13px; font-weight: 600; line-height: 1.35; margin-bottom: 10px; letter-spacing: -.01em; }
+    .ev-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; }
+    .ev-loc { display: inline-flex; align-items: center; gap: 4px; font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); font-weight: 500; }
+    .ev-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+    .ev-sep { width: 1px; height: 9px; background: var(--border); }
+    .ev-who { font-size: 9px; color: var(--muted); }
+
+    /* ─── VIEWS ─── */
+    .app-view { display: none; }
+    .app-view.active { display: block; }
+
+    /* ─── MONTH VIEW ─── */
+    .month-nav-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 24px; animation: fadeUp .4s ease .1s both;
+    }
+    .month-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.8rem; font-weight: 700; letter-spacing: -.01em;
+    }
+    .month-arrow {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 1px solid var(--border); background: none;
+      color: var(--dim); font-size: 18px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .15s, color .15s;
+    }
+    .month-arrow:hover { background: var(--surface-2); color: var(--text); }
+
+    .cal-grid {
+      display: grid; grid-template-columns: repeat(7, 1fr);
+      border: 1px solid var(--border); animation: fadeUp .4s ease .15s both;
+    }
+    .cal-dow {
+      padding: 8px 4px; text-align: center;
+      font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
+      color: var(--muted); font-weight: 600;
+      border-bottom: 1px solid var(--border);
+    }
+    .cal-dow:last-child, .cal-dow:nth-last-child(2) { color: var(--room-c); }
+
+    .cal-cell {
+      padding: 8px 6px 6px;
+      min-height: 56px;
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      transition: background .15s;
+    }
+    .cal-cell:nth-child(7n) { border-right: none; }
+    .cal-cell.empty { background: rgba(0,0,0,.15); }
+    .cal-cell.has-events { cursor: pointer; }
+    .cal-cell.has-events:hover, .cal-cell.selected { background: var(--surface-2); }
+    .cal-cell.is-today .cal-date { color: var(--accent); font-weight: 700; }
+    .cal-cell.selected .cal-date {
+      background: var(--accent); color: var(--bg);
+      border-radius: 50%; width: 22px; height: 22px;
+      display: flex; align-items: center; justify-content: center;
     }
 
-    .ev-time::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border);
-    }
+    .cal-date { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--dim); }
+    .cal-dots { display: flex; gap: 2px; flex-wrap: wrap; justify-content: center; }
+    .cal-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+    .cal-dot.done { opacity: .35; }
+    .cal-more { font-size: 7px; color: var(--muted); }
 
-    .ev-title {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text);
-      line-height: 1.35;
-      margin-bottom: 10px;
-      letter-spacing: -0.01em;
+    .day-detail {
+      display: none; margin-top: 24px;
+      border-top: 1px solid var(--border); padding-top: 20px;
     }
+    .day-detail.open { display: block; animation: fadeUp .25s ease; }
+    .day-detail-hdr {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .day-detail-date {
+      font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--dim);
+    }
+    .day-detail-close {
+      background: none; border: none; color: var(--muted);
+      cursor: pointer; font-size: 20px; line-height: 1; padding: 2px 6px;
+    }
+    .day-detail-cards { display: flex; flex-direction: column; gap: 9px; }
 
-    .ev-meta {
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 7px;
-    }
-
-    .ev-loc {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 9px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--dim);
-      font-weight: 500;
-    }
-
-    .ev-dot {
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-
-    .ev-sep {
-      width: 1px;
-      height: 9px;
-      background: var(--border);
-    }
-
-    .ev-who {
-      font-size: 9px;
-      letter-spacing: 0.07em;
-      color: var(--muted);
-    }
+    /* ─── BOTTOM NAV (mobile) ─── */
+    .bottom-nav { display: none; }
 
     /* ─── FOOTER ─── */
     .page-footer {
-      margin-top: 72px;
-      padding-top: 24px;
+      display: flex; justify-content: space-between; align-items: center;
+      padding-top: 24px; margin-top: 48px;
       border-top: 1px solid var(--border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      opacity: 0;
-      animation: fadeUp 0.5s ease 0.9s forwards;
+      animation: fadeUp .5s ease .9s both;
     }
+    .footer-copy { font-size: 9px; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); }
+    .footer-mark { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-style: italic; color: var(--muted); }
 
-    .footer-copy {
-      font-size: 9px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-
-    .footer-mark {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 18px;
-      font-style: italic;
-      color: var(--muted);
-    }
-
+    /* ─── ANIMATIONS ─── */
     @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(16px); }
+      from { opacity: 0; transform: translateY(14px); }
       to   { opacity: 1; transform: translateY(0); }
     }
-
     @keyframes slideIn {
-      from { opacity: 0; transform: translateX(16px); }
+      from { opacity: 0; transform: translateX(12px); }
       to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; } 50% { opacity: .3; }
     }
 
     /* ─── TABLET ─── */
     @media (max-width: 1200px) {
-      .week-grid { grid-template-columns: repeat(3, 1fr); }
-      .wrap { padding: 0 32px 80px; }
+      #week-content { grid-template-columns: repeat(3, 1fr); }
+      .view-wrap { padding: 0 32px 60px; }
     }
 
     /* ─── MOBILE ─── */
     @media (max-width: 640px) {
+      .view-wrap { padding: 0; }
 
-      /* Compact wrap — no side padding (tabs/cards handle their own) */
-      .wrap { padding: 0 0 80px; }
-
-      /* ── Compact header ── */
       .header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 14px;
-        padding: 44px 20px 24px;
-        margin-bottom: 0;
-        border-bottom: none;
+        flex-direction: column; align-items: flex-start; gap: 14px;
+        padding: 44px 16px 24px; margin-bottom: 0; border-bottom: none;
       }
-
-      .header-title {
-        font-size: clamp(3.4rem, 17vw, 5rem);
-      }
-
-      .header-right {
-        text-align: left;
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        column-gap: 16px;
-        row-gap: 6px;
-      }
-
+      .header-title { font-size: clamp(3.4rem, 17vw, 5rem); }
+      .header-right { text-align: left; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
       .header-range { margin-bottom: 0; }
-      .today-pill   { margin-top: 0; }
+      .today-pill { margin-top: 0; }
+      .view-toggle { display: none; }
 
-      /* ── Hide legend (colors visible on cards) ── */
       .legend { display: none; }
 
-      /* ── Day tab bar ── */
+      /* Day tabs */
       .day-tabs {
         display: flex;
-        position: sticky;
-        top: 3px;
-        z-index: 50;
-        background: rgba(9,8,6,0.96);
-        backdrop-filter: blur(12px);
+        position: sticky; top: 3px; z-index: 50;
+        background: rgba(9,8,6,.95); backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
         border-bottom: 1px solid var(--border);
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-        opacity: 0;
-        animation: fadeUp 0.4s ease 0.15s forwards;
+        overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+        animation: fadeUp .4s ease .15s both;
       }
-
       .day-tabs::-webkit-scrollbar { display: none; }
 
       .tab {
-        flex: 1;
-        min-width: 62px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 2px;
-        padding: 11px 6px 9px;
-        background: none;
-        border: none;
-        border-bottom: 2px solid transparent;
-        color: var(--muted);
-        cursor: pointer;
-        transition: color 0.15s, border-color 0.15s;
-        -webkit-tap-highlight-color: transparent;
-        touch-action: manipulation;
+        flex: 1; min-width: 62px;
+        display: flex; flex-direction: column; align-items: center; gap: 2px;
+        padding: 11px 6px 9px; background: none;
+        border: none; border-bottom: 2px solid transparent;
+        color: var(--muted); cursor: pointer;
+        transition: color .15s, border-color .15s;
+        -webkit-tap-highlight-color: transparent; touch-action: manipulation;
       }
+      .tab-name { font-family: 'Cormorant Garamond', serif; font-size: 1.55rem; font-weight: 700; line-height: 1; }
+      .tab-date { font-family: 'JetBrains Mono', monospace; font-size: 8.5px; opacity: .7; }
+      .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+      .tab.is-today .tab-date::after { content: ' ●'; font-size: 6px; color: var(--accent); }
 
-      .tab-name {
-        font-family: 'Cormorant Garamond', serif;
-        font-size: 1.55rem;
-        font-weight: 700;
-        line-height: 1;
-      }
-
-      .tab-date {
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 8.5px;
-        letter-spacing: 0.06em;
-        color: inherit;
-        opacity: 0.7;
-      }
-
-      .tab.active {
-        color: var(--accent);
-        border-bottom-color: var(--accent);
-      }
-
-      /* Pulse dot on today's tab */
-      .tab.is-today .tab-date::after {
-        content: ' ●';
-        font-size: 6px;
-        color: var(--accent);
-        vertical-align: middle;
-      }
-
-      /* ── Week grid → single column ── */
-      .week-grid {
-        grid-template-columns: 1fr;
-        gap: 0;
-        padding: 20px 16px 0;
-      }
-
-      /* Hide non-active days */
+      /* Week cards */
+      #week-content { display: block; padding: 16px 16px 0; }
       .day-col { display: none; }
-
-      .day-col.active {
-        display: flex;
-        animation: slideIn 0.22s ease;
-      }
-
-      /* Hide day header on mobile (tab already shows day/date) */
+      .day-col.active { display: flex; animation: slideIn .22s ease; }
       .day-head { display: none; }
 
-      /* Larger touch-friendly cards */
-      .ev {
-        padding: 16px 16px 14px;
-        min-height: 80px;
-      }
+      .ev { padding: 16px 44px 14px 16px; }
+      .ev-time { font-size: 12px; margin-bottom: 9px; }
+      .ev-title { font-size: 15px; margin-bottom: 12px; }
+      .ev-loc { font-size: 11px; }
+      .ev-who { font-size: 11px; }
 
-      .ev-time {
-        font-size: 12px;
-        margin-bottom: 9px;
-      }
+      /* Month view */
+      .month-nav-bar { padding: 0 16px; margin-bottom: 0; }
+      .cal-grid { border-left: none; border-right: none; }
+      .cal-cell { padding: 6px 2px 5px; min-height: 50px; }
+      .cal-date { font-size: 10px; }
+      .cal-dot { width: 4px; height: 4px; }
+      .day-detail { margin: 0; padding: 16px 16px 0; }
 
-      .ev-title {
-        font-size: 16px;
-        margin-bottom: 12px;
-      }
-
-      .ev-loc  { font-size: 11px; }
-      .ev-who  { font-size: 11px; }
-
-      /* Swipe hint (shown briefly on first load) */
       .swipe-hint {
-        text-align: center;
-        font-size: 9px;
-        letter-spacing: 0.18em;
-        text-transform: uppercase;
-        color: var(--muted);
+        text-align: center; font-size: 9px; letter-spacing: .18em;
+        text-transform: uppercase; color: var(--muted);
         padding: 14px 0 4px;
-        opacity: 0;
-        animation: fadeUp 0.5s ease 0.8s forwards;
+        animation: fadeUp .5s ease .8s both;
       }
 
-      /* Footer */
-      .page-footer {
-        margin-top: 36px;
-        padding: 20px 16px;
+      /* Bottom nav */
+      .bottom-nav {
+        display: flex;
+        position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+        background: rgba(9,8,6,.96); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+        border-top: 1px solid var(--border);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
       }
+      .bnav {
+        flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
+        padding: 10px 8px 10px; background: none; border: none;
+        color: var(--muted); cursor: pointer; font-size: 10px; letter-spacing: .1em;
+        transition: color .15s; -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+      }
+      .bnav.active { color: var(--accent); }
+      .bnav svg { flex-shrink: 0; }
+
+      .page-footer { padding: 20px 16px; margin-top: 24px; }
     }
 
     @media (max-width: 360px) {
       .header-title { font-size: clamp(3rem, 20vw, 4rem); }
-      .tab { min-width: 52px; padding: 10px 4px 8px; }
+      .tab { min-width: 52px; }
       .tab-name { font-size: 1.35rem; }
     }
   </style>
 </head>
 <body>
-
 <div class="top-strip"></div>
 
-<div class="wrap">
+<div class="app">
+  <!-- ── HEADER ── -->
+  <div class="view-wrap">
+    <header class="header">
+      <div>
+        <p class="header-eyebrow">2026년 23주차</p>
+        <h1 class="header-title">주간<br><span class="hi">일정표</span></h1>
+      </div>
+      <div class="header-right">
+        <p class="header-range">2026–06–01 ─── 2026–06–05</p>
+        <p class="header-count">총 10개 일정 · 5일 · 6명 참여</p>
+        <div class="today-pill">오늘 · 06/01</div>
+        <div class="view-toggle">
+          <button class="vtog active" data-view="week">주간</button>
+          <button class="vtog" data-view="month">월간</button>
+        </div>
+      </div>
+    </header>
+  </div>
 
-  <!-- HEADER -->
-  <header class="header">
-    <div>
-      <p class="header-eyebrow">2026년 23주차</p>
-      <h1 class="header-title">
-        주간<br><span class="highlight">일정표</span>
-      </h1>
-    </div>
-    <div class="header-right">
-      <p class="header-range">2026–06–01 ─── 2026–06–05</p>
-      <p class="header-count">총 10개 일정 · 5일 · 6명 참여</p>
-      <div class="today-pill">오늘 · 06 / 01</div>
-    </div>
-  </header>
-
-  <!-- MOBILE DAY TABS -->
-  <nav class="day-tabs" aria-label="요일 선택">
-    <button class="tab is-today active" data-target="mon">
-      <span class="tab-name">월</span>
-      <span class="tab-date">06/01</span>
-    </button>
-    <button class="tab" data-target="tue">
-      <span class="tab-name">화</span>
-      <span class="tab-date">06/02</span>
-    </button>
-    <button class="tab" data-target="wed">
-      <span class="tab-name">수</span>
-      <span class="tab-date">06/03</span>
-    </button>
-    <button class="tab" data-target="thu">
-      <span class="tab-name">목</span>
-      <span class="tab-date">06/04</span>
-    </button>
-    <button class="tab" data-target="fri">
-      <span class="tab-name">금</span>
-      <span class="tab-date">06/05</span>
-    </button>
+  <!-- ── MOBILE DAY TABS ── -->
+  <nav class="day-tabs" id="day-tabs">
+    <button class="tab is-today active" data-idx="0"><span class="tab-name">월</span><span class="tab-date">06/01</span></button>
+    <button class="tab" data-idx="1"><span class="tab-name">화</span><span class="tab-date">06/02</span></button>
+    <button class="tab" data-idx="2"><span class="tab-name">수</span><span class="tab-date">06/03</span></button>
+    <button class="tab" data-idx="3"><span class="tab-name">목</span><span class="tab-date">06/04</span></button>
+    <button class="tab" data-idx="4"><span class="tab-name">금</span><span class="tab-date">06/05</span></button>
   </nav>
 
-  <!-- LEGEND (desktop only) -->
-  <nav class="legend" aria-label="장소 범례">
-    <span class="legend-label">장소</span>
-    <span class="leg"><span class="leg-dot" style="background:var(--room-a)"></span>회의실 A</span>
-    <span class="leg"><span class="leg-dot" style="background:var(--room-b)"></span>회의실 B</span>
-    <span class="leg"><span class="leg-dot" style="background:var(--room-c)"></span>회의실 C</span>
-    <span class="leg"><span class="leg-dot" style="background:var(--online)"></span>온라인</span>
-    <span class="leg"><span class="leg-dot" style="background:var(--external)"></span>외부</span>
-    <span class="leg"><span class="leg-dot" style="background:var(--cafeteria)"></span>카페테리아</span>
-    <span class="leg"><span class="leg-dot" style="background:var(--ceo)"></span>대표실</span>
-  </nav>
-
-  <!-- WEEK GRID -->
-  <main class="week-grid">
-
-    <!-- MON -->
-    <div class="day-col active" data-day="mon">
-      <div class="day-head today-col" style="animation-delay:0.3s">
-        <div class="day-name">월</div>
-        <div class="day-num">06 / 01</div>
-        <div class="day-ev-count">1 일정</div>
-      </div>
-      <article class="ev" style="color:var(--room-b)" data-delay="380">
-        <div class="ev-time">14:00</div>
-        <div class="ev-title">신규 프로젝트 킥오프</div>
-        <div class="ev-meta">
-          <span class="ev-loc"><span class="ev-dot" style="background:var(--room-b)"></span>회의실 B</span>
-          <span class="ev-sep"></span>
-          <span class="ev-who">김종해</span>
-        </div>
-      </article>
+  <!-- ── WEEK VIEW ── -->
+  <div id="week-view" class="app-view active">
+    <div class="view-wrap">
+      <nav class="legend">
+        <span class="legend-label">장소</span>
+        <span class="leg"><span class="leg-dot" style="background:var(--room-a)"></span>회의실 A</span>
+        <span class="leg"><span class="leg-dot" style="background:var(--room-b)"></span>회의실 B</span>
+        <span class="leg"><span class="leg-dot" style="background:var(--room-c)"></span>회의실 C</span>
+        <span class="leg"><span class="leg-dot" style="background:var(--online)"></span>온라인</span>
+        <span class="leg"><span class="leg-dot" style="background:var(--external)"></span>외부</span>
+        <span class="leg"><span class="leg-dot" style="background:var(--cafeteria)"></span>카페테리아</span>
+        <span class="leg"><span class="leg-dot" style="background:var(--ceo)"></span>대표실</span>
+      </nav>
+      <main id="week-content"></main>
+      <p class="swipe-hint">← 스와이프로 요일 이동 →</p>
+      <footer class="page-footer">
+        <span class="footer-copy">© 2026 · 성격 유형 연구소</span>
+        <span class="footer-mark">Jun. 2026</span>
+      </footer>
     </div>
+  </div>
 
-    <!-- TUE -->
-    <div class="day-col" data-day="tue">
-      <div class="day-head" style="animation-delay:0.36s">
-        <div class="day-name">화</div>
-        <div class="day-num">06 / 02</div>
-        <div class="day-ev-count">2 일정</div>
+  <!-- ── MONTH VIEW ── -->
+  <div id="month-view" class="app-view">
+    <div class="view-wrap">
+      <div class="month-nav-bar">
+        <button class="month-arrow" id="prev-month">&#8249;</button>
+        <span class="month-title" id="month-title"></span>
+        <button class="month-arrow" id="next-month">&#8250;</button>
       </div>
-      <article class="ev" style="color:var(--online)" data-delay="440">
-        <div class="ev-time">10:00</div>
-        <div class="ev-title">UX 리뷰</div>
-        <div class="ev-meta">
-          <span class="ev-loc"><span class="ev-dot" style="background:var(--online)"></span>온라인</span>
-          <span class="ev-sep"></span>
-          <span class="ev-who">한소희</span>
+      <div class="cal-grid" id="cal-grid"></div>
+      <div class="day-detail" id="day-detail">
+        <div class="day-detail-hdr">
+          <span class="day-detail-date" id="detail-date"></span>
+          <button class="day-detail-close" onclick="clearDetail()">×</button>
         </div>
-      </article>
-      <article class="ev" style="color:var(--external)" data-delay="500">
-        <div class="ev-time">15:00</div>
-        <div class="ev-title">클라이언트 미팅</div>
-        <div class="ev-meta">
-          <span class="ev-loc"><span class="ev-dot" style="background:var(--external)"></span>외부</span>
-          <span class="ev-sep"></span>
-          <span class="ev-who">영업팀</span>
-        </div>
-      </article>
-    </div>
-
-    <!-- WED -->
-    <div class="day-col" data-day="wed">
-      <div class="day-head" style="animation-delay:0.42s">
-        <div class="day-name">수</div>
-        <div class="day-num">06 / 03</div>
-        <div class="day-ev-count">2 일정</div>
+        <div class="day-detail-cards" id="detail-cards"></div>
       </div>
-      <article class="ev" style="color:var(--room-a)" data-delay="560">
-        <div class="ev-time">09:30</div>
-        <div class="ev-title">개발 스프린트 점검</div>
-        <div class="ev-meta">
-          <span class="ev-loc"><span class="ev-dot" style="background:var(--room-a)"></span>회의실 A</span>
-          <span class="ev-sep"></span>
-          <span class="ev-who">개발팀</span>
-        </div>
-      </article>
-      <article class="ev" style="color:var(--cafeteria)" data-delay="620">
-        <div class="ev-time">13:00</div>
-        <div class="ev-title">점심 세미나</div>
-        <div class="ev-meta">
-          <span class="ev-loc"><span class="ev-dot" style="background:var(--cafeteria)"></span>카페테리아</span>
-          <span class="ev-sep"></span>
-          <span class="ev-who">전체</span>
-        </div>
-      </article>
     </div>
-
-    <!-- THU -->
-    <div class="day-col" data-day="thu">
-      <div class="day-head" style="animation-delay:0.48s">
-        <div class="day-name">목</div>
-        <div class="day-num">06 / 04</div>
-        <div class="day-ev-count">2 일정</div>
-      </div>
-      <article class="ev" style="color:var(--room-c)" data-delay="680">
-        <div class="ev-time">10:00</div>
-        <div class="ev-title">마케팅 전략 회의</div>
-        <div class="ev-meta">
-          <span class="ev-loc"><span class="ev-dot" style="background:var(--room-c)"></span>회의실 C</span>
-          <span class="ev-sep"></span>
-          <span class="ev-who">마케팅팀</span>
-        </div>
-      </article>
-      <article class="ev" style="color:var(--ceo)" data-delay="740">
-        <div class="ev-time">16:00</div>
-        <div class="ev-title">1:1 면담</div>
-        <div class="ev-meta">
-          <span class="ev-loc"><span class="ev-dot" style="background:var(--ceo)"></span>대표실</span>
-          <span class="ev-sep"></span>
-          <span class="ev-who">김종해</span>
-        </div>
-      </article>
-    </div>
-
-    <!-- FRI -->
-    <div class="day-col" data-day="fri">
-      <div class="day-head" style="animation-delay:0.54s">
-        <div class="day-name">금</div>
-        <div class="day-num">06 / 05</div>
-        <div class="day-ev-count">3 일정</div>
-      </div>
-      <article class="ev" style="color:var(--room-a)" data-delay="800">
-        <div class="ev-time">09:00</div>
-        <div class="ev-title">주간 성과 리뷰</div>
-        <div class="ev-meta">
-          <span class="ev-loc"><span class="ev-dot" style="background:var(--room-a)"></span>회의실 A</span>
-          <span class="ev-sep"></span>
-          <span class="ev-who">전체</span>
-        </div>
-      </article>
-      <article class="ev" style="color:var(--online)" data-delay="860">
-        <div class="ev-time">14:00</div>
-        <div class="ev-title">다음주 계획 수립</div>
-        <div class="ev-meta">
-          <span class="ev-loc"><span class="ev-dot" style="background:var(--online)"></span>온라인</span>
-          <span class="ev-sep"></span>
-          <span class="ev-who">팀장급</span>
-        </div>
-      </article>
-      <article class="ev" style="color:var(--room-b)" data-delay="920">
-        <div class="ev-time">17:00</div>
-        <div class="ev-title">주간 마감 보고</div>
-        <div class="ev-meta">
-          <span class="ev-loc"><span class="ev-dot" style="background:var(--room-b)"></span>회의실 B</span>
-          <span class="ev-sep"></span>
-          <span class="ev-who">전체</span>
-        </div>
-      </article>
-    </div>
-
-  </main>
-
-  <!-- Mobile swipe hint -->
-  <p class="swipe-hint">← 스와이프로 요일 이동 →</p>
-
-  <!-- FOOTER -->
-  <footer class="page-footer">
-    <span class="footer-copy">© 2026 · 성격 유형 연구소</span>
-    <span class="footer-mark">Jun. 2026</span>
-  </footer>
-
+  </div>
 </div>
 
+<!-- ── BOTTOM NAV (mobile) ── -->
+<nav class="bottom-nav">
+  <button class="bnav active" data-view="week">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <rect x="2" y="4.5" width="16" height="2" rx="1" fill="currentColor"/>
+      <rect x="2" y="9"   width="12" height="2" rx="1" fill="currentColor"/>
+      <rect x="2" y="13.5" width="14" height="2" rx="1" fill="currentColor"/>
+    </svg>
+    <span>주간</span>
+  </button>
+  <button class="bnav" data-view="month">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <rect x="1.5" y="1.5" width="7.5" height="7.5" rx="1.5" fill="currentColor"/>
+      <rect x="11"  y="1.5" width="7.5" height="7.5" rx="1.5" fill="currentColor"/>
+      <rect x="1.5" y="11"  width="7.5" height="7.5" rx="1.5" fill="currentColor"/>
+      <rect x="11"  y="11"  width="7.5" height="7.5" rx="1.5" fill="currentColor"/>
+    </svg>
+    <span>월간</span>
+  </button>
+</nav>
+
 <script>
-  // ─── Card reveal animation ───
-  document.querySelectorAll('.ev').forEach(card => {
-    const delay = parseInt(card.dataset.delay || '400', 10);
-    setTimeout(() => {
-      card.style.transition = 'opacity 0.42s cubic-bezier(0.22,1,0.36,1), transform 0.42s cubic-bezier(0.22,1,0.36,1), background 0.18s ease, box-shadow 0.18s ease';
-      card.classList.add('in');
-    }, delay);
+// ── DATA ──────────────────────────────────────────────
+const LOC = {
+  '회의실 A': 'var(--room-a)', '회의실 B': 'var(--room-b)', '회의실 C': 'var(--room-c)',
+  '온라인': 'var(--online)', '외부': 'var(--external)',
+  '카페테리아': 'var(--cafeteria)', '대표실': 'var(--ceo)',
+};
+
+const SCHEDULE = {
+  '2026-06-01': [
+    { id:'ev-0601-1400', time:'14:00', title:'신규 프로젝트 킥오프', loc:'회의실 B', who:'김종해' },
+  ],
+  '2026-06-02': [
+    { id:'ev-0602-1000', time:'10:00', title:'UX 리뷰', loc:'온라인', who:'한소희' },
+    { id:'ev-0602-1500', time:'15:00', title:'클라이언트 미팅', loc:'외부', who:'영업팀' },
+  ],
+  '2026-06-03': [
+    { id:'ev-0603-0930', time:'09:30', title:'개발 스프린트 점검', loc:'회의실 A', who:'개발팀' },
+    { id:'ev-0603-1300', time:'13:00', title:'점심 세미나', loc:'카페테리아', who:'전체' },
+  ],
+  '2026-06-04': [
+    { id:'ev-0604-1000', time:'10:00', title:'마케팅 전략 회의', loc:'회의실 C', who:'마케팅팀' },
+    { id:'ev-0604-1600', time:'16:00', title:'1:1 면담', loc:'대표실', who:'김종해' },
+  ],
+  '2026-06-05': [
+    { id:'ev-0605-0900', time:'09:00', title:'주간 성과 리뷰', loc:'회의실 A', who:'전체' },
+    { id:'ev-0605-1400', time:'14:00', title:'다음주 계획 수립', loc:'온라인', who:'팀장급' },
+    { id:'ev-0605-1700', time:'17:00', title:'주간 마감 보고', loc:'회의실 B', who:'전체' },
+  ],
+};
+
+const WEEK_DAYS = [
+  { date:'2026-06-01', name:'월', num:'06/01', today:true },
+  { date:'2026-06-02', name:'화', num:'06/02' },
+  { date:'2026-06-03', name:'수', num:'06/03' },
+  { date:'2026-06-04', name:'목', num:'06/04' },
+  { date:'2026-06-05', name:'금', num:'06/05' },
+];
+
+const KO_DOW = ['일','월','화','수','목','금','토'];
+
+// ── STATE ─────────────────────────────────────────────
+const state = {
+  view: 'week',
+  dayIdx: 0,
+  cal: { year: 2026, month: 6 },
+  selectedDate: null,
+  done: JSON.parse(localStorage.getItem('schedule_done') || '{}'),
+};
+
+// ── HELPERS ───────────────────────────────────────────
+function saveDone() {
+  localStorage.setItem('schedule_done', JSON.stringify(state.done));
+}
+
+function checkmark() {
+  return `<svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+    <polyline points="1,4 4,7 9,1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`;
+}
+
+function createCard(ev) {
+  const c = LOC[ev.loc];
+  const done = !!state.done[ev.id];
+  return `
+    <article class="ev ${done?'done':''}" style="color:${c}">
+      <button class="ev-check" onclick="toggleDone('${ev.id}')" aria-label="${done?'완료 취소':'완료 표시'}">
+        ${done ? checkmark() : ''}
+      </button>
+      <div class="ev-time">${ev.time}</div>
+      <div class="ev-title">${ev.title}</div>
+      <div class="ev-meta">
+        <span class="ev-loc"><span class="ev-dot" style="background:${c}"></span>${ev.loc}</span>
+        <span class="ev-sep"></span>
+        <span class="ev-who">${ev.who}</span>
+      </div>
+    </article>`;
+}
+
+function revealCards(container) {
+  container.querySelectorAll('.ev:not(.show)').forEach((card, i) => {
+    setTimeout(() => card.classList.add('show'), 30 + i * 70);
   });
+}
 
-  // ─── Mobile tab + swipe ───
-  const DAYS = ['mon', 'tue', 'wed', 'thu', 'fri'];
-  let current = 0;
+// ── WEEK VIEW ─────────────────────────────────────────
+function renderWeek() {
+  const el = document.getElementById('week-content');
+  el.innerHTML = WEEK_DAYS.map((day, i) => {
+    const evs = SCHEDULE[day.date] || [];
+    const active = i === state.dayIdx ? 'active' : '';
+    const todayHead = day.today ? 'today-col' : '';
+    const cards = evs.length
+      ? evs.map(createCard).join('')
+      : `<p style="font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);padding:16px 0">일정 없음</p>`;
+    return `
+      <div class="day-col ${active}" data-day-idx="${i}">
+        <div class="day-head ${todayHead}">
+          <div class="day-name">${day.name}</div>
+          <div class="day-num">${day.date}</div>
+          <div class="day-ev-count">${evs.length} 일정</div>
+        </div>
+        ${cards}
+      </div>`;
+  }).join('');
+  setTimeout(() => revealCards(el), 40);
+}
 
-  const tabs    = document.querySelectorAll('.tab');
-  const dayCols = document.querySelectorAll('.day-col');
+function showDay(idx) {
+  state.dayIdx = idx;
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i===idx));
+  document.querySelectorAll('.day-col').forEach(c =>
+    c.classList.toggle('active', +c.dataset.dayIdx === idx)
+  );
+  revealCards(document.getElementById('week-content'));
+}
 
-  function showDay(idx) {
-    const target = DAYS[idx];
-    current = idx;
+// ── MONTH VIEW ────────────────────────────────────────
+function renderMonth() {
+  const { year, month } = state.cal;
+  const months = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  document.getElementById('month-title').textContent = `${year}년 ${months[month-1]}`;
 
-    tabs.forEach((t, i) => t.classList.toggle('active', i === idx));
+  const firstDow = new Date(year, month - 1, 1).getDay(); // 0=Sun
+  const offset = (firstDow + 6) % 7; // Mon-first
+  const daysInMonth = new Date(year, month, 0).getDate();
 
-    dayCols.forEach(col => {
-      if (col.dataset.day === target) {
-        col.classList.add('active');
-      } else {
-        col.classList.remove('active');
-      }
-    });
+  let html = KO_DOW.slice(1).concat(KO_DOW[0]).map(d =>
+    `<div class="cal-dow">${d}</div>`
+  ).join('');
+
+  for (let i = 0; i < offset; i++) html += `<div class="cal-cell empty"></div>`;
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateKey = `${year}-${String(month).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const evs = SCHEDULE[dateKey] || [];
+    const isToday = dateKey === '2026-06-01';
+    const isSel = state.selectedDate === dateKey;
+    const dots = evs.slice(0,3).map(ev =>
+      `<span class="cal-dot${state.done[ev.id]?' done':''}" style="background:${LOC[ev.loc]}"></span>`
+    ).join('') + (evs.length > 3 ? `<span class="cal-more">+${evs.length-3}</span>` : '');
+    const classes = [
+      'cal-cell',
+      evs.length ? 'has-events' : '',
+      isToday ? 'is-today' : '',
+      isSel ? 'selected' : '',
+    ].filter(Boolean).join(' ');
+    const click = evs.length ? `onclick="selectDate('${dateKey}')"` : '';
+    html += `
+      <div class="${classes}" ${click}>
+        <span class="cal-date">${d}</span>
+        <div class="cal-dots">${dots}</div>
+      </div>`;
   }
 
-  tabs.forEach((tab, i) => {
-    tab.addEventListener('click', () => showDay(i));
-  });
+  // Trailing empty cells
+  const total = offset + daysInMonth;
+  const remainder = total % 7;
+  if (remainder) {
+    for (let i = 0; i < 7 - remainder; i++) html += `<div class="cal-cell empty"></div>`;
+  }
 
-  // ─── Swipe gesture ───
-  let touchX = 0;
+  document.getElementById('cal-grid').innerHTML = html;
+  const detail = document.getElementById('day-detail');
+  if (!state.selectedDate) detail.classList.remove('open');
+}
 
-  document.addEventListener('touchstart', e => {
-    touchX = e.changedTouches[0].clientX;
-  }, { passive: true });
+function selectDate(dateKey) {
+  state.selectedDate = dateKey;
+  renderMonth();
 
-  document.addEventListener('touchend', e => {
-    const diff = touchX - e.changedTouches[0].clientX;
-    if (Math.abs(diff) < 50) return;
-    if (diff > 0 && current < DAYS.length - 1) showDay(current + 1); // swipe left → next
-    if (diff < 0 && current > 0)              showDay(current - 1); // swipe right → prev
-  }, { passive: true });
+  const evs = SCHEDULE[dateKey] || [];
+  const date = new Date(dateKey);
+  const dow = KO_DOW[date.getDay()];
+  const label = `${date.getFullYear()}년 ${date.getMonth()+1}월 ${date.getDate()}일 (${dow})`;
+
+  document.getElementById('detail-date').textContent = label;
+  const cards = document.getElementById('detail-cards');
+  cards.innerHTML = evs.map(createCard).join('');
+  document.getElementById('day-detail').classList.add('open');
+  setTimeout(() => revealCards(cards), 30);
+}
+
+function clearDetail() {
+  state.selectedDate = null;
+  document.getElementById('day-detail').classList.remove('open');
+  renderMonth();
+}
+
+// ── COMPLETION ────────────────────────────────────────
+function toggleDone(id) {
+  state.done[id] = !state.done[id];
+  if (!state.done[id]) delete state.done[id];
+  saveDone();
+  if (state.view === 'week') renderWeek();
+  else {
+    renderMonth();
+    if (state.selectedDate) selectDate(state.selectedDate);
+  }
+}
+
+// ── VIEW SWITCH ───────────────────────────────────────
+function switchView(v) {
+  state.view = v;
+  document.getElementById('week-view').classList.toggle('active', v === 'week');
+  document.getElementById('month-view').classList.toggle('active', v === 'month');
+  document.getElementById('day-tabs').style.display = v === 'week' ? '' : 'none';
+  document.querySelectorAll('.vtog').forEach(b => b.classList.toggle('active', b.dataset.view === v));
+  document.querySelectorAll('.bnav').forEach(b => b.classList.toggle('active', b.dataset.view === v));
+  if (v === 'week') renderWeek();
+  else renderMonth();
+}
+
+// ── EVENT LISTENERS ───────────────────────────────────
+document.querySelectorAll('.tab').forEach((t,i) => t.addEventListener('click', () => showDay(i)));
+document.querySelectorAll('.vtog').forEach(b => b.addEventListener('click', () => switchView(b.dataset.view)));
+document.querySelectorAll('.bnav').forEach(b => b.addEventListener('click', () => switchView(b.dataset.view)));
+document.getElementById('prev-month').addEventListener('click', () => {
+  if (--state.cal.month < 1) { state.cal.month = 12; state.cal.year--; }
+  state.selectedDate = null;
+  renderMonth();
+});
+document.getElementById('next-month').addEventListener('click', () => {
+  if (++state.cal.month > 12) { state.cal.month = 1; state.cal.year++; }
+  state.selectedDate = null;
+  renderMonth();
+});
+
+// Swipe gesture
+let touchX = 0;
+document.addEventListener('touchstart', e => { touchX = e.changedTouches[0].clientX; }, { passive: true });
+document.addEventListener('touchend', e => {
+  if (state.view !== 'week') return;
+  const diff = touchX - e.changedTouches[0].clientX;
+  if (Math.abs(diff) < 50) return;
+  if (diff > 0 && state.dayIdx < 4) showDay(state.dayIdx + 1);
+  if (diff < 0 && state.dayIdx > 0) showDay(state.dayIdx - 1);
+}, { passive: true });
+
+// ── INIT ──────────────────────────────────────────────
+renderWeek();
+
+// PWA service worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
 </script>
-
 </body>
 </html>

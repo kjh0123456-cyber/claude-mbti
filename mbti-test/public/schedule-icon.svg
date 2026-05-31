@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="108" fill="#0A0907"/>
+  <rect x="80" y="120" width="352" height="288" rx="28" fill="#1C1A15"/>
+  <rect x="80" y="120" width="352" height="92" rx="28" fill="#E8DC4A"/>
+  <rect x="80" y="184" width="352" height="28" fill="#E8DC4A"/>
+  <text x="256" y="175" font-family="Georgia,serif" font-size="52" font-weight="700" fill="#0A0907" text-anchor="middle" dominant-baseline="middle">JUN</text>
+  <rect x="112" y="252" width="288" height="1.5" fill="#272420"/>
+  <rect x="112" y="310" width="288" height="1.5" fill="#272420"/>
+  <rect x="112" y="368" width="288" height="1.5" fill="#272420"/>
+  <rect x="195" y="232" width="1.5" height="156" fill="#272420"/>
+  <rect x="277" y="232" width="1.5" height="156" fill="#272420"/>
+  <rect x="360" y="232" width="1.5" height="156" fill="#272420"/>
+  <circle cx="153" cy="282" r="11" fill="#A78BFA"/>
+  <circle cx="235" cy="282" r="11" fill="#34D399"/>
+  <circle cx="318" cy="282" r="11" fill="#60A5FA"/>
+  <circle cx="235" cy="340" r="11" fill="#FB923C"/>
+  <circle cx="318" cy="340" r="11" fill="#F472B6"/>
+  <circle cx="153" cy="340" r="11" fill="#FBBF24"/>
+  <circle cx="153" cy="398" r="11" fill="#F87171"/>
+</svg>

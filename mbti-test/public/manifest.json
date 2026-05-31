@@ -1,0 +1,16 @@
+{
+  "name": "주간 일정표",
+  "short_name": "일정표",
+  "description": "2026년 6월 주간 일정 관리",
+  "start_url": "/claude-mbti/weekly-schedule.html",
+  "scope": "/claude-mbti/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#090806",
+  "theme_color": "#090806",
+  "icons": [
+    { "src": "schedule-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "schedule-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "schedule-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
