@@ -12,23 +12,22 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:        #090806;
-      --surface:   #121109;
-      --surface-2: #1C1A15;
-      --border:    #272420;
-      --text:      #EAE6DC;
-      --dim:       #8A8278;
-      --muted:     #4A4640;
-      --accent:    #E8DC4A;
+      --bg:         #090806;
+      --surface:    #121109;
+      --surface-2:  #1C1A15;
+      --border:     #272420;
+      --text:       #EAE6DC;
+      --dim:        #8A8278;
+      --muted:      #4A4640;
+      --accent:     #E8DC4A;
       --accent-dim: rgba(232,220,74,0.12);
-
-      --room-a:    #60A5FA;
-      --room-b:    #A78BFA;
-      --room-c:    #F472B6;
-      --online:    #34D399;
-      --external:  #FBBF24;
-      --cafeteria: #FB923C;
-      --ceo:       #F87171;
+      --room-a:     #60A5FA;
+      --room-b:     #A78BFA;
+      --room-c:     #F472B6;
+      --online:     #34D399;
+      --external:   #FBBF24;
+      --cafeteria:  #FB923C;
+      --ceo:        #F87171;
     }
 
     html { scroll-behavior: smooth; }
@@ -41,7 +40,6 @@
       overflow-x: hidden;
     }
 
-    /* Dot grid */
     body::before {
       content: '';
       position: fixed;
@@ -52,7 +50,6 @@
       z-index: 0;
     }
 
-    /* Edge vignette */
     body::after {
       content: '';
       position: fixed;
@@ -62,7 +59,6 @@
       z-index: 0;
     }
 
-    /* Top accent strip */
     .top-strip {
       position: fixed;
       top: 0; left: 0; right: 0;
@@ -124,7 +120,6 @@
     .header-title .highlight {
       font-style: italic;
       color: var(--accent);
-      display: inline-block;
     }
 
     .header-right {
@@ -202,7 +197,6 @@
       gap: 6px;
       font-size: 10px;
       color: var(--dim);
-      letter-spacing: 0.04em;
     }
 
     .leg-dot {
@@ -212,7 +206,10 @@
       flex-shrink: 0;
     }
 
-    /* ─── GRID ─── */
+    /* ─── MOBILE DAY TABS (hidden on desktop) ─── */
+    .day-tabs { display: none; }
+
+    /* ─── WEEK GRID ─── */
     .week-grid {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
@@ -231,14 +228,11 @@
       padding-bottom: 14px;
       margin-bottom: 4px;
       border-bottom: 2px solid var(--border);
-      position: relative;
       opacity: 0;
       animation: fadeUp 0.45s ease forwards;
     }
 
-    .day-head.today-col {
-      border-bottom-color: var(--accent);
-    }
+    .day-head.today-col { border-bottom-color: var(--accent); }
 
     .day-name {
       font-family: 'Cormorant Garamond', serif;
@@ -248,9 +242,7 @@
       letter-spacing: -0.02em;
     }
 
-    .day-head.today-col .day-name {
-      color: var(--accent);
-    }
+    .day-head.today-col .day-name { color: var(--accent); }
 
     .day-num {
       font-family: 'JetBrains Mono', monospace;
@@ -381,27 +373,183 @@
       color: var(--muted);
     }
 
-    /* ─── ANIMATIONS ─── */
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(16px); }
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* ─── RESPONSIVE ─── */
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(16px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    /* ─── TABLET ─── */
     @media (max-width: 1200px) {
       .week-grid { grid-template-columns: repeat(3, 1fr); }
       .wrap { padding: 0 32px 80px; }
     }
 
-    @media (max-width: 760px) {
-      .week-grid { grid-template-columns: 1fr 1fr; }
-      .wrap { padding: 0 20px 64px; }
-      .header { flex-direction: column; align-items: flex-start; }
-      .header-right { text-align: left; }
+    /* ─── MOBILE ─── */
+    @media (max-width: 640px) {
+
+      /* Compact wrap — no side padding (tabs/cards handle their own) */
+      .wrap { padding: 0 0 80px; }
+
+      /* ── Compact header ── */
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 44px 20px 24px;
+        margin-bottom: 0;
+        border-bottom: none;
+      }
+
+      .header-title {
+        font-size: clamp(3.4rem, 17vw, 5rem);
+      }
+
+      .header-right {
+        text-align: left;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        column-gap: 16px;
+        row-gap: 6px;
+      }
+
+      .header-range { margin-bottom: 0; }
+      .today-pill   { margin-top: 0; }
+
+      /* ── Hide legend (colors visible on cards) ── */
+      .legend { display: none; }
+
+      /* ── Day tab bar ── */
+      .day-tabs {
+        display: flex;
+        position: sticky;
+        top: 3px;
+        z-index: 50;
+        background: rgba(9,8,6,0.96);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border);
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        opacity: 0;
+        animation: fadeUp 0.4s ease 0.15s forwards;
+      }
+
+      .day-tabs::-webkit-scrollbar { display: none; }
+
+      .tab {
+        flex: 1;
+        min-width: 62px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        padding: 11px 6px 9px;
+        background: none;
+        border: none;
+        border-bottom: 2px solid transparent;
+        color: var(--muted);
+        cursor: pointer;
+        transition: color 0.15s, border-color 0.15s;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+      }
+
+      .tab-name {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 1.55rem;
+        font-weight: 700;
+        line-height: 1;
+      }
+
+      .tab-date {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 8.5px;
+        letter-spacing: 0.06em;
+        color: inherit;
+        opacity: 0.7;
+      }
+
+      .tab.active {
+        color: var(--accent);
+        border-bottom-color: var(--accent);
+      }
+
+      /* Pulse dot on today's tab */
+      .tab.is-today .tab-date::after {
+        content: ' ●';
+        font-size: 6px;
+        color: var(--accent);
+        vertical-align: middle;
+      }
+
+      /* ── Week grid → single column ── */
+      .week-grid {
+        grid-template-columns: 1fr;
+        gap: 0;
+        padding: 20px 16px 0;
+      }
+
+      /* Hide non-active days */
+      .day-col { display: none; }
+
+      .day-col.active {
+        display: flex;
+        animation: slideIn 0.22s ease;
+      }
+
+      /* Hide day header on mobile (tab already shows day/date) */
+      .day-head { display: none; }
+
+      /* Larger touch-friendly cards */
+      .ev {
+        padding: 16px 16px 14px;
+        min-height: 80px;
+      }
+
+      .ev-time {
+        font-size: 12px;
+        margin-bottom: 9px;
+      }
+
+      .ev-title {
+        font-size: 16px;
+        margin-bottom: 12px;
+      }
+
+      .ev-loc  { font-size: 11px; }
+      .ev-who  { font-size: 11px; }
+
+      /* Swipe hint (shown briefly on first load) */
+      .swipe-hint {
+        text-align: center;
+        font-size: 9px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--muted);
+        padding: 14px 0 4px;
+        opacity: 0;
+        animation: fadeUp 0.5s ease 0.8s forwards;
+      }
+
+      /* Footer */
+      .page-footer {
+        margin-top: 36px;
+        padding: 20px 16px;
+      }
     }
 
-    @media (max-width: 480px) {
-      .week-grid { grid-template-columns: 1fr; }
+    @media (max-width: 360px) {
+      .header-title { font-size: clamp(3rem, 20vw, 4rem); }
+      .tab { min-width: 52px; padding: 10px 4px 8px; }
+      .tab-name { font-size: 1.35rem; }
     }
   </style>
 </head>
@@ -416,8 +564,7 @@
     <div>
       <p class="header-eyebrow">2026년 23주차</p>
       <h1 class="header-title">
-        주간<br>
-        <span class="highlight">일정표</span>
+        주간<br><span class="highlight">일정표</span>
       </h1>
     </div>
     <div class="header-right">
@@ -427,7 +574,31 @@
     </div>
   </header>
 
-  <!-- LEGEND -->
+  <!-- MOBILE DAY TABS -->
+  <nav class="day-tabs" aria-label="요일 선택">
+    <button class="tab is-today active" data-target="mon">
+      <span class="tab-name">월</span>
+      <span class="tab-date">06/01</span>
+    </button>
+    <button class="tab" data-target="tue">
+      <span class="tab-name">화</span>
+      <span class="tab-date">06/02</span>
+    </button>
+    <button class="tab" data-target="wed">
+      <span class="tab-name">수</span>
+      <span class="tab-date">06/03</span>
+    </button>
+    <button class="tab" data-target="thu">
+      <span class="tab-name">목</span>
+      <span class="tab-date">06/04</span>
+    </button>
+    <button class="tab" data-target="fri">
+      <span class="tab-name">금</span>
+      <span class="tab-date">06/05</span>
+    </button>
+  </nav>
+
+  <!-- LEGEND (desktop only) -->
   <nav class="legend" aria-label="장소 범례">
     <span class="legend-label">장소</span>
     <span class="leg"><span class="leg-dot" style="background:var(--room-a)"></span>회의실 A</span>
@@ -443,7 +614,7 @@
   <main class="week-grid">
 
     <!-- MON -->
-    <div class="day-col">
+    <div class="day-col active" data-day="mon">
       <div class="day-head today-col" style="animation-delay:0.3s">
         <div class="day-name">월</div>
         <div class="day-num">06 / 01</div>
@@ -461,7 +632,7 @@
     </div>
 
     <!-- TUE -->
-    <div class="day-col">
+    <div class="day-col" data-day="tue">
       <div class="day-head" style="animation-delay:0.36s">
         <div class="day-name">화</div>
         <div class="day-num">06 / 02</div>
@@ -488,7 +659,7 @@
     </div>
 
     <!-- WED -->
-    <div class="day-col">
+    <div class="day-col" data-day="wed">
       <div class="day-head" style="animation-delay:0.42s">
         <div class="day-name">수</div>
         <div class="day-num">06 / 03</div>
@@ -515,7 +686,7 @@
     </div>
 
     <!-- THU -->
-    <div class="day-col">
+    <div class="day-col" data-day="thu">
       <div class="day-head" style="animation-delay:0.48s">
         <div class="day-name">목</div>
         <div class="day-num">06 / 04</div>
@@ -542,7 +713,7 @@
     </div>
 
     <!-- FRI -->
-    <div class="day-col">
+    <div class="day-col" data-day="fri">
       <div class="day-head" style="animation-delay:0.54s">
         <div class="day-name">금</div>
         <div class="day-num">06 / 05</div>
@@ -579,6 +750,9 @@
 
   </main>
 
+  <!-- Mobile swipe hint -->
+  <p class="swipe-hint">← 스와이프로 요일 이동 →</p>
+
   <!-- FOOTER -->
   <footer class="page-footer">
     <span class="footer-copy">© 2026 · 성격 유형 연구소</span>
@@ -588,7 +762,7 @@
 </div>
 
 <script>
-  // Staggered card reveal on load
+  // ─── Card reveal animation ───
   document.querySelectorAll('.ev').forEach(card => {
     const delay = parseInt(card.dataset.delay || '400', 10);
     setTimeout(() => {
@@ -596,6 +770,46 @@
       card.classList.add('in');
     }, delay);
   });
+
+  // ─── Mobile tab + swipe ───
+  const DAYS = ['mon', 'tue', 'wed', 'thu', 'fri'];
+  let current = 0;
+
+  const tabs    = document.querySelectorAll('.tab');
+  const dayCols = document.querySelectorAll('.day-col');
+
+  function showDay(idx) {
+    const target = DAYS[idx];
+    current = idx;
+
+    tabs.forEach((t, i) => t.classList.toggle('active', i === idx));
+
+    dayCols.forEach(col => {
+      if (col.dataset.day === target) {
+        col.classList.add('active');
+      } else {
+        col.classList.remove('active');
+      }
+    });
+  }
+
+  tabs.forEach((tab, i) => {
+    tab.addEventListener('click', () => showDay(i));
+  });
+
+  // ─── Swipe gesture ───
+  let touchX = 0;
+
+  document.addEventListener('touchstart', e => {
+    touchX = e.changedTouches[0].clientX;
+  }, { passive: true });
+
+  document.addEventListener('touchend', e => {
+    const diff = touchX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) < 50) return;
+    if (diff > 0 && current < DAYS.length - 1) showDay(current + 1); // swipe left → next
+    if (diff < 0 && current > 0)              showDay(current - 1); // swipe right → prev
+  }, { passive: true });
 </script>
 
 </body>
